@@ -59,7 +59,7 @@ function Navbar() {
         scrolled ? "bg-[#f4f2eb]/90 backdrop-blur-md shadow-sm" : "bg-transparent"
       }`}
     >
-      <nav className="flex justify-between items-center px-6 py-5 w-full max-w-7xl mx-auto">
+      <nav className="flex justify-between items-center px-6 py-3 w-full max-w-7xl mx-auto">
         <Link href="#hero" className="flex items-center">
           <Image
             src="/logo.png"
