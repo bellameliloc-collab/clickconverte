@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
+// Inicializa dentro do handler para evitar erro em build time sem a env var
 export async function POST(req: NextRequest) {
   try {
     const { nome, email, negocio, mensagem } = await req.json()
@@ -10,6 +9,13 @@ export async function POST(req: NextRequest) {
     if (!nome || !email || !mensagem) {
       return NextResponse.json({ error: "Campos obrigatórios faltando." }, { status: 400 })
     }
+
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+      return NextResponse.json({ error: "Serviço de email não configurado." }, { status: 503 })
+    }
+
+    const resend = new Resend(apiKey)
 
     await resend.emails.send({
       from: "ClickConverte Site <onboarding@resend.dev>",
