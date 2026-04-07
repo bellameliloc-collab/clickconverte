@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     const resend = new Resend(apiKey)
 
     await resend.emails.send({
-      from: "ClickConverte Site <onboarding@resend.dev>",
+      from: "ClickConverte <contato@clickconverte.com.br>",
       to: "contato@clickconverte.com.br",
       replyTo: email,
       subject: `Novo contato de ${nome}`,
