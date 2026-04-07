@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     await resend.emails.send({
       from: "ClickConverte <contato@clickconverte.com.br>",
-      to: "contato@clickconverte.com.br",
+      to: "bellameliloc@gmail.com",
       replyTo: email,
       subject: `Novo contato de ${nome}`,
       html: `
