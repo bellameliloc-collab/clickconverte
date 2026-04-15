@@ -6,6 +6,7 @@ import Floating, { FloatingElement } from "@/components/ui/floating"
 import { AuroraBackground } from "@/components/ui/aurora-background"
 import { TextRevealByWord } from "@/components/ui/text-reveal"
 import { ContainerScroll } from "@/components/ui/container-scroll"
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion-1"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -50,6 +51,7 @@ function Navbar() {
     { href: "#sobre", label: "Sobre" },
     { href: "#servicos", label: "Serviços" },
     { href: "#cases", label: "Cases" },
+    { href: "#faq", label: "FAQ" },
     { href: "#contato", label: "Contato" },
   ]
 
@@ -230,7 +232,7 @@ function Hero() {
 function Sobre() {
   return (
     <section id="sobre" className="bg-surface">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 pt-28 pb-0">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 pt-16 pb-0">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-32 mb-0">
           <FadeUp delay={0}>
             <span className="text-xs uppercase tracking-[0.2em] text-accent font-headline font-bold mb-6 block">
@@ -311,13 +313,13 @@ function ServiceCard({ title, desc, index }: { title: string; desc: string; inde
 
 function Servicos() {
   return (
-    <section id="servicos" className="py-24 md:py-32 px-6 md:px-12 bg-[#faf9f4]">
+    <section id="servicos" className="py-14 md:py-20 px-6 md:px-12 bg-[#faf9f4]">
       <div className="max-w-7xl mx-auto">
         <FadeUp>
           <span className="text-xs uppercase tracking-[0.2em] text-accent font-headline font-bold mb-4 block">
             Serviços
           </span>
-          <h2 className="text-4xl md:text-6xl font-display text-primary font-medium mb-20">
+          <h2 className="text-4xl md:text-6xl font-display text-primary font-medium mb-12">
             Soluções sob medida para o seu negócio
           </h2>
         </FadeUp>
@@ -328,7 +330,7 @@ function Servicos() {
           ))}
         </div>
 
-        <FadeUp delay={0.3} className="mt-20">
+        <FadeUp delay={0.3} className="mt-12">
           <a
             href="#contato"
             className="inline-block bg-primary text-white px-12 py-5 font-headline font-semibold text-sm tracking-wide rounded-none hover:-translate-y-0.5 transition-all duration-200 hover:bg-primary/90"
@@ -344,7 +346,7 @@ function Servicos() {
 // ─── Cases ────────────────────────────────────────────────────────────────────
 function Cases() {
   return (
-    <section id="cases" className="bg-surface py-24 md:py-32 px-6 md:px-12">
+    <section id="cases" className="bg-surface py-14 md:py-20 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
         <FadeUp>
           <span className="text-xs uppercase tracking-[0.2em] text-accent font-headline font-bold mb-6 block">
@@ -355,11 +357,12 @@ function Cases() {
 
       <TextRevealByWord
         text="Resultados que falam por si"
+        className="max-w-7xl mx-auto px-6 md:px-12"
       />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 mt-12">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 mt-8">
         <FadeUp delay={0.1}>
-          <p className="text-lg md:text-xl text-primary/70 font-body leading-relaxed max-w-4xl mb-20">
+          <p className="text-lg md:text-xl text-primary/70 font-body leading-relaxed max-w-4xl mb-12">
             Ao longo da nossa trajetória, construímos resultados expressivos para negócios de
             diferentes segmentos — do varejo físico ao digital, de profissionais autônomos a
             empresas em expansão. Trabalhamos com marcas que precisavam ir além da presença online e
@@ -374,9 +377,6 @@ function Cases() {
         <ContainerScroll
           titleComponent={
             <div className="mb-6">
-              <p className="text-xs uppercase tracking-[0.2em] text-accent font-headline font-bold mb-3">
-                Portfolio Visual
-              </p>
               <h3 className="text-3xl md:text-4xl font-display italic text-primary">
                 Todas as ações para a conversão
               </h3>
@@ -401,6 +401,61 @@ function Cases() {
             Quer fazer parte dessa história?
             <span className="absolute bottom-0 left-0 w-full h-[1px] bg-accent scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
           </a>
+        </FadeUp>
+      </div>
+    </section>
+  )
+}
+
+// ─── FAQ ──────────────────────────────────────────────────────────────────────
+const faqItems = [
+  {
+    question: "Para quem é a ClickConverte?",
+    answer:
+      "Para quem tem um negócio real e quer que o digital trabalhe por ele. Atendemos prestadores de serviço, donos de produtos físicos e criadores de produtos digitais que faturam, mas não convertem online. Se você tem tráfego e não tem venda, ou tem produto bom e não tem visibilidade, é exatamente isso que a gente resolve.",
+  },
+  {
+    question: "Qual a diferença entre vocês e uma agência comum?",
+    answer:
+      "A maioria das agências entrega conteúdo. A gente entrega conversão. Surgimos para transformar cliques em clientes — por isso cada estratégia começa com posicionamento e termina com resultado mensurável. Não fazemos post pelo post. Fazemos post para vender.",
+  },
+  {
+    question: "Como funciona para começar?",
+    answer:
+      "Preencha o formulário aqui do site e agende sua sessão de consultoria gratuita. Em uma conversa rápida, a gente entende o seu negócio, onde você está e o que faz sentido para o seu momento. O diagnóstico vem primeiro — porque o que converte para um produto físico é diferente do que converte para um serviço ou infoproduto.",
+  },
+]
+
+function FAQ() {
+  return (
+    <section id="faq" className="bg-[#faf9f4] py-14 md:py-20 px-6 md:px-12">
+      <div className="max-w-7xl mx-auto">
+        <FadeUp>
+          <span className="text-xs uppercase tracking-[0.2em] text-accent font-headline font-bold mb-6 block">
+            FAQ
+          </span>
+          <h2 className="text-4xl md:text-5xl font-display text-primary font-medium mb-12">
+            Perguntas frequentes
+          </h2>
+        </FadeUp>
+
+        <FadeUp delay={0.1}>
+          <Accordion
+            type="single"
+            collapsible
+            className="w-full border-t border-primary/10"
+          >
+            {faqItems.map((item, i) => (
+              <AccordionItem key={i} value={`faq-${i}`} className="border-b border-primary/10">
+                <AccordionTrigger className="text-left text-base md:text-lg font-headline font-semibold text-primary py-6 hover:text-accent transition-colors [&[data-state=open]>svg]:text-accent">
+                  {item.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-primary/70 font-body text-sm md:text-base leading-relaxed">
+                  {item.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </FadeUp>
       </div>
     </section>
@@ -442,7 +497,7 @@ function Contato() {
     "w-full bg-transparent border-0 border-b border-white/20 py-4 text-white placeholder:text-white/30 focus:outline-none focus:border-accent transition-colors duration-300 font-body text-sm"
 
   return (
-    <section id="contato" className="py-24 md:py-32 px-6 md:px-12 bg-primary">
+    <section id="contato" className="py-14 md:py-20 px-6 md:px-12 bg-primary">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-24 items-start">
         {/* Left */}
         <FadeUp>
@@ -609,6 +664,7 @@ export default function Home() {
         <Sobre />
         <Servicos />
         <Cases />
+        <FAQ />
         <Contato />
       </main>
       <Footer />
