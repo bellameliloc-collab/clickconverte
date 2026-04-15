@@ -388,7 +388,7 @@ function Cases() {
               src="/images/Image1.png"
               alt="Cases ClickConverte"
               fill
-              className="object-cover object-center"
+              className="object-contain object-center"
             />
           </div>
         </ContainerScroll>
