@@ -378,14 +378,14 @@ function Cases() {
                 Portfolio Visual
               </p>
               <h3 className="text-3xl md:text-4xl font-display italic text-primary">
-                Cases em imagens
+                Todas as ações para a conversão
               </h3>
             </div>
           }
         >
           <div className="relative h-full w-full overflow-hidden">
             <Image
-              src="/images/imagee.png"
+              src="/images/Image1.png"
               alt="Cases ClickConverte"
               fill
               className="object-cover object-center"
