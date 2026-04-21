@@ -618,7 +618,8 @@ function ConversionFlowAnimation() {
   }, [])
 
   return (
-    <div className="w-full">
+    <div className="w-full overflow-x-auto md:overflow-visible">
+      <div className="min-w-[700px] md:min-w-0">
       <style>{`
         .cf-trunk { fill: none; stroke: #324b67; stroke-linecap: round; }
         .cf-trunk-active { fill: none; stroke: #cfb53b; stroke-linecap: round; }
@@ -680,6 +681,7 @@ function ConversionFlowAnimation() {
           <g id="cf-nodes-group" />
         </g>
       </svg>
+      </div>
     </div>
   )
 }
