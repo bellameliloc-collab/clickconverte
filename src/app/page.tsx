@@ -5,7 +5,6 @@ import { motion, useInView, AnimatePresence } from "framer-motion"
 import Floating, { FloatingElement } from "@/components/ui/floating"
 import { AuroraBackground } from "@/components/ui/aurora-background"
 import { TextRevealByWord } from "@/components/ui/text-reveal"
-import { ContainerScroll } from "@/components/ui/container-scroll"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion-1"
 import Image from "next/image"
 import Link from "next/link"
@@ -171,11 +170,11 @@ function Hero() {
             transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
             className="text-5xl md:text-7xl lg:text-8xl font-display text-primary leading-[1.08] mb-8 font-medium max-w-4xl"
           >
-            Branding que posiciona. Social{" "}
+            Branding que posiciona.{" "}
             <em className="italic text-accent not-italic font-display" style={{ fontStyle: "italic" }}>
-              media
+              Ações
             </em>{" "}
-            que converte.
+            que convertem.
           </motion.h1>
 
           <motion.p
@@ -283,6 +282,10 @@ const services = [
     title: "Consultoria Pontual",
     desc: "Uma sessão estratégica para diagnosticar onde sua presença digital está falhando e o que fazer para mudar isso.",
   },
+  {
+    title: "Gestão e Consultoria de Vendas em Marketplaces",
+    desc: "Estruturamos sua presença e operação em marketplaces como Amazon, Mercado Livre e Shopee. Do cadastro estratégico de produtos ao acompanhamento de métricas, entregamos uma operação rentável e escalável.",
+  },
 ]
 
 function ServiceCard({ title, desc, index }: { title: string; desc: string; index: number }) {
@@ -343,6 +346,285 @@ function Servicos() {
   )
 }
 
+// ─── Conversion Flow Animation ───────────────────────────────────────────────
+type CfNodeKind = "cursor" | "play" | "heart" | "message" | "cart" | "click" | "handshake"
+
+interface CfNode {
+  id: string
+  x: number
+  y: number
+  z: number
+  kind: CfNodeKind
+}
+
+const CF_NODES: CfNode[] = [
+  { id: "cursor",    x: 110,  y: 300, z: 0.85, kind: "cursor"    },
+  { id: "play",      x: 300,  y: 170, z: 0.45, kind: "play"      },
+  { id: "heart",     x: 520,  y: 330, z: 0.95, kind: "heart"     },
+  { id: "message",   x: 720,  y: 160, z: 0.30, kind: "message"   },
+  { id: "cart",      x: 910,  y: 335, z: 0.90, kind: "cart"      },
+  { id: "click",     x: 1120, y: 180, z: 0.50, kind: "click"     },
+  { id: "handshake", x: 1300, y: 310, z: 1.00, kind: "handshake" },
+]
+
+const CF_ICONS: Record<CfNodeKind, string> = {
+  cursor: `<path d="M6 4 L6 20 L10 16 L14 22 L16 21 L12 15 L17 15 Z" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>`,
+  play: `<polygon points="8,6 8,18 18,12" stroke-width="1.4" stroke-linejoin="round"/>`,
+  heart: `<path d="M12 21 C12 21 4 14 4 8.5 A4.5 4.5 0 0 1 12 6.1 A4.5 4.5 0 0 1 20 8.5 C20 14 12 21 12 21Z" stroke-width="1.4" stroke-linejoin="round"/>`,
+  message: `<path d="M4 5 h16 a1 1 0 0 1 1 1 v9 a1 1 0 0 1-1 1 H8 L4 20 V6 a1 1 0 0 1 1-1Z" stroke-width="1.4" stroke-linejoin="round"/>`,
+  cart: `<circle cx="9" cy="20" r="1.2"/><circle cx="17" cy="20" r="1.2"/><path d="M2 3 h2 l2.68 10.39 A2 2 0 0 0 8.6 15 H17 a2 2 0 0 0 1.94-1.51 L20.5 8 H6" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>`,
+  click: `<path d="M9 3v4M15 3v4M3 9h18M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z" stroke-width="1.4" stroke-linecap="round"/><path d="M9 13l2 2 4-4" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>`,
+  handshake: `<path d="M4 12 L9 17 L20 6" stroke-width="0"/><path d="M2 11 L8 5 C9 4 10 4 11 5 L13 7 L17 3 C18 2 20 2 21 3 L22 4 C23 5 23 7 22 8 L14 16 C13 17 12 17 11 16 L9 14 L6 17 C5 18 4 18 3 17 L2 16 C1 15 1 12 2 11Z" stroke-width="1.4" stroke-linejoin="round"/>`,
+}
+
+function bezierPath(x1: number, y1: number, x2: number, y2: number) {
+  const cx = (x1 + x2) / 2
+  return `M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`
+}
+
+function ConversionFlowAnimation() {
+  const svgRef = useRef<SVGSVGElement>(null)
+
+  useEffect(() => {
+    const svg = svgRef.current
+    if (!svg) return
+
+    const cam = svg.getElementById("cf-cam") as SVGGElement
+    const trunksG = svg.getElementById("cf-trunks") as SVGGElement
+    const trunksA = svg.getElementById("cf-trunks-a") as SVGGElement
+    const shadowsG = svg.getElementById("cf-shadows") as SVGGElement
+    const nodesG = svg.getElementById("cf-nodes") as SVGGElement
+    const pring = svg.getElementById("cf-pring") as SVGCircleElement
+    const pdot = svg.getElementById("cf-pdot") as SVGCircleElement
+
+    const ns = "http://www.w3.org/2000/svg"
+
+    // Build trunk paths
+    const paths: SVGPathElement[] = []
+    const pathsA: SVGPathElement[] = []
+    for (let i = 0; i < CF_NODES.length - 1; i++) {
+      const a = CF_NODES[i], b = CF_NODES[i + 1]
+      const d = bezierPath(a.x, a.y, b.x, b.y)
+
+      const p = document.createElementNS(ns, "path")
+      p.setAttribute("d", d)
+      p.setAttribute("fill", "none")
+      p.setAttribute("stroke", "#324b67")
+      p.setAttribute("stroke-width", "1.2")
+      p.setAttribute("opacity", "0.18")
+      trunksG.appendChild(p)
+      paths.push(p)
+
+      const pa = document.createElementNS(ns, "path")
+      pa.setAttribute("d", d)
+      pa.setAttribute("fill", "none")
+      pa.setAttribute("stroke", "#cfb53b")
+      pa.setAttribute("stroke-width", "1.6")
+      pa.setAttribute("opacity", "0")
+      const len = p.getTotalLength()
+      pa.setAttribute("stroke-dasharray", String(len))
+      pa.setAttribute("stroke-dashoffset", String(len))
+      trunksA.appendChild(pa)
+      pathsA.push(pa)
+    }
+
+    // Build shadow ellipses
+    CF_NODES.forEach((n) => {
+      const e = document.createElementNS(ns, "ellipse")
+      const r = 16 * n.z
+      e.setAttribute("cx", String(n.x))
+      e.setAttribute("cy", String(n.y + 28 * n.z))
+      e.setAttribute("rx", String(r))
+      e.setAttribute("ry", String(r * 0.3))
+      e.setAttribute("fill", "#324b67")
+      e.setAttribute("opacity", String(0.07 * n.z))
+      shadowsG.appendChild(e)
+    })
+
+    // Build node groups
+    const nodeEls: SVGGElement[] = []
+    CF_NODES.forEach((n) => {
+      const s = n.z
+      const r = 22 * s
+
+      const g = document.createElementNS(ns, "g")
+      g.id = `cf-node-${n.id}`
+      g.setAttribute("class", "cf-node")
+      g.setAttribute("transform", `translate(${n.x},${n.y})`)
+
+      const ring = document.createElementNS(ns, "circle")
+      ring.setAttribute("class", "cf-node-ring")
+      ring.setAttribute("r", String(r))
+      ring.setAttribute("fill", "transparent")
+      ring.setAttribute("stroke", "#324b67")
+      ring.setAttribute("stroke-width", String(1.2 * s))
+      ring.setAttribute("opacity", "0.35")
+      g.appendChild(ring)
+
+      const halo = document.createElementNS(ns, "circle")
+      halo.setAttribute("class", "cf-halo")
+      halo.setAttribute("r", String(r))
+      halo.setAttribute("fill", "none")
+      halo.setAttribute("stroke", "#cfb53b")
+      halo.setAttribute("stroke-width", String(1.5 * s))
+      halo.setAttribute("opacity", "0")
+      g.appendChild(halo)
+
+      const icon = document.createElementNS(ns, "g")
+      icon.setAttribute("class", "cf-glyph")
+      icon.setAttribute("fill", "none")
+      icon.setAttribute("stroke", "#324b67")
+      icon.setAttribute("stroke-width", "1.3")
+      icon.setAttribute("opacity", String(0.55 + 0.4 * s))
+      const sc = (r * 1.25) / 12
+      icon.setAttribute("transform", `scale(${sc}) translate(-12,-12)`)
+      icon.innerHTML = CF_ICONS[n.kind]
+      g.appendChild(icon)
+
+      nodesG.appendChild(g)
+      nodeEls.push(g)
+    })
+
+    // Animation state
+    let raf = 0
+    let t = 0
+    let activeIdx = 0
+    let activeProg = 0
+
+    function activate(idx: number) {
+      activeIdx = idx
+      activeProg = 0
+      nodeEls.forEach((el, i) => {
+        if (i === idx) {
+          el.classList.add("cf-active")
+          const ring = el.querySelector(".cf-node-ring")
+          const halo = el.querySelector(".cf-halo")
+          if (ring) ring.setAttribute("stroke", "#cfb53b")
+          if (halo) {
+            halo.setAttribute("opacity", "0.7")
+            halo.setAttribute("class", "cf-halo cf-burst")
+          }
+        } else if (i < idx) {
+          el.classList.add("cf-active")
+          const ring = el.querySelector(".cf-node-ring")
+          if (ring) ring.setAttribute("stroke", "#cfb53b")
+        } else {
+          el.classList.remove("cf-active")
+          const ring = el.querySelector(".cf-node-ring")
+          const halo = el.querySelector(".cf-halo")
+          if (ring) ring.setAttribute("stroke", "#324b67")
+          if (halo) {
+            halo.setAttribute("opacity", "0")
+            halo.setAttribute("class", "cf-halo")
+          }
+        }
+      })
+      pathsA.forEach((pa, i) => {
+        if (i < idx) {
+          pa.setAttribute("opacity", "0.7")
+          pa.setAttribute("stroke-dashoffset", "0")
+        } else {
+          pa.setAttribute("opacity", "0")
+        }
+      })
+    }
+
+    function tick() {
+      t += 0.008
+      activeProg += 0.025
+
+      // Animate active path
+      if (activeIdx < pathsA.length) {
+        const pa = pathsA[activeIdx]
+        const len = paths[activeIdx].getTotalLength()
+        const off = len * Math.max(0, 1 - activeProg)
+        pa.setAttribute("stroke-dashoffset", String(off))
+        pa.setAttribute("opacity", String(Math.min(0.7, activeProg * 2)))
+
+        // Pulse dot along active path
+        const pt = paths[activeIdx].getPointAtLength(len * Math.min(1, activeProg))
+        pring.setAttribute("cx", String(pt.x))
+        pring.setAttribute("cy", String(pt.y))
+        pring.setAttribute("r", "6")
+        pring.style.opacity = String(Math.min(0.8, activeProg * 3))
+        pdot.setAttribute("cx", String(pt.x))
+        pdot.setAttribute("cy", String(pt.y))
+        pdot.style.opacity = String(Math.min(1, activeProg * 3))
+
+        if (activeProg >= 1 && activeIdx < CF_NODES.length - 1) {
+          setTimeout(() => activate(activeIdx + 1), 200)
+        }
+        if (activeIdx >= CF_NODES.length - 1 && activeProg >= 1) {
+          pring.style.opacity = "0"
+          pdot.style.opacity = "0"
+          // Restart after pause
+          setTimeout(() => {
+            nodeEls.forEach((el) => {
+              el.classList.remove("cf-active")
+              const ring = el.querySelector(".cf-node-ring")
+              const halo = el.querySelector(".cf-halo")
+              if (ring) ring.setAttribute("stroke", "#324b67")
+              if (halo) { halo.setAttribute("opacity", "0"); halo.setAttribute("class", "cf-halo") }
+            })
+            pathsA.forEach((pa) => { pa.setAttribute("opacity", "0"); pa.setAttribute("stroke-dashoffset", pa.getAttribute("stroke-dasharray") || "0") })
+            activate(0)
+          }, 1800)
+        }
+      }
+
+      // Camera sway
+      const swayX = Math.sin(t * 0.4) * 6
+      const swayY = Math.sin(t * 0.27) * 3
+      cam.setAttribute("transform", `translate(${swayX},${swayY})`)
+
+      raf = requestAnimationFrame(tick)
+    }
+
+    activate(0)
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
+  return (
+    <div className="w-full overflow-hidden rounded-sm">
+      <style>{`
+        .cf-node-ring { transition: stroke 0.4s; }
+        .cf-glyph { transition: stroke 0.4s; }
+        .cf-node.cf-active .cf-glyph { stroke: #cfb53b; }
+        @keyframes cf-halo {
+          0%   { opacity: 0.7; r: 22px; stroke-width: 2px; }
+          60%  { opacity: 0.2; r: 36px; stroke-width: 1px; }
+          100% { opacity: 0;   r: 44px; stroke-width: 0.5px; }
+        }
+        .cf-halo.cf-burst { animation: cf-halo 1400ms ease-out forwards; }
+      `}</style>
+      <svg
+        ref={svgRef}
+        viewBox="0 0 1400 480"
+        style={{ width: "100%", aspectRatio: "14/4.8", display: "block" }}
+        aria-hidden="true"
+      >
+        <defs>
+          <filter id="cf-blur"><feGaussianBlur stdDeviation="0.5" /></filter>
+          <linearGradient id="cf-floor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#f4f2eb" stopOpacity="0" />
+            <stop offset="100%" stopColor="#f4f2eb" stopOpacity="0.6" />
+          </linearGradient>
+        </defs>
+        <rect x="0" y="360" width="1400" height="120" fill="url(#cf-floor)" />
+        <g id="cf-cam">
+          <g id="cf-shadows" />
+          <g id="cf-trunks" />
+          <g id="cf-trunks-a" />
+          <circle id="cf-pring" r="6" cx="0" cy="0" fill="none" stroke="#cfb53b" strokeWidth="1.5" style={{ opacity: 0 }} />
+          <circle id="cf-pdot" r="3" cx="0" cy="0" fill="#cfb53b" style={{ opacity: 0 }} />
+          <g id="cf-nodes" />
+        </g>
+      </svg>
+    </div>
+  )
+}
+
 // ─── Cases ────────────────────────────────────────────────────────────────────
 function Cases() {
   return (
@@ -374,24 +656,12 @@ function Cases() {
           </p>
         </FadeUp>
 
-        <ContainerScroll
-          titleComponent={
-            <div className="mb-6">
-              <h3 className="text-3xl md:text-4xl font-display italic text-primary">
-                Todas as ações para a conversão
-              </h3>
-            </div>
-          }
-        >
-          <div className="relative h-full w-full overflow-hidden">
-            <Image
-              src="/images/Image1.png"
-              alt="Cases ClickConverte"
-              fill
-              className="object-contain object-center"
-            />
-          </div>
-        </ContainerScroll>
+        <FadeUp delay={0.15}>
+          <h3 className="text-3xl md:text-4xl font-display italic text-primary mb-8">
+            Todas as ações para a conversão
+          </h3>
+          <ConversionFlowAnimation />
+        </FadeUp>
 
         <FadeUp delay={0.1} className="mt-16 text-center">
           <a
