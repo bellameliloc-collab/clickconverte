@@ -347,41 +347,6 @@ function Servicos() {
 }
 
 // ─── Conversion Flow Animation ───────────────────────────────────────────────
-type CfNodeKind = "cursor" | "play" | "heart" | "message" | "cart" | "click" | "handshake"
-
-interface CfNode {
-  id: string
-  x: number
-  y: number
-  z: number
-  kind: CfNodeKind
-}
-
-const CF_NODES: CfNode[] = [
-  { id: "cursor",    x: 110,  y: 300, z: 0.85, kind: "cursor"    },
-  { id: "play",      x: 300,  y: 170, z: 0.45, kind: "play"      },
-  { id: "heart",     x: 520,  y: 330, z: 0.95, kind: "heart"     },
-  { id: "message",   x: 720,  y: 160, z: 0.30, kind: "message"   },
-  { id: "cart",      x: 910,  y: 335, z: 0.90, kind: "cart"      },
-  { id: "click",     x: 1120, y: 180, z: 0.50, kind: "click"     },
-  { id: "handshake", x: 1300, y: 310, z: 1.00, kind: "handshake" },
-]
-
-const CF_ICONS: Record<CfNodeKind, string> = {
-  cursor: `<path d="M6 4 L6 20 L10 16 L14 22 L16 21 L12 15 L17 15 Z" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>`,
-  play: `<polygon points="8,6 8,18 18,12" stroke-width="1.4" stroke-linejoin="round"/>`,
-  heart: `<path d="M12 21 C12 21 4 14 4 8.5 A4.5 4.5 0 0 1 12 6.1 A4.5 4.5 0 0 1 20 8.5 C20 14 12 21 12 21Z" stroke-width="1.4" stroke-linejoin="round"/>`,
-  message: `<path d="M4 5 h16 a1 1 0 0 1 1 1 v9 a1 1 0 0 1-1 1 H8 L4 20 V6 a1 1 0 0 1 1-1Z" stroke-width="1.4" stroke-linejoin="round"/>`,
-  cart: `<circle cx="9" cy="20" r="1.2"/><circle cx="17" cy="20" r="1.2"/><path d="M2 3 h2 l2.68 10.39 A2 2 0 0 0 8.6 15 H17 a2 2 0 0 0 1.94-1.51 L20.5 8 H6" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>`,
-  click: `<path d="M9 3v4M15 3v4M3 9h18M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z" stroke-width="1.4" stroke-linecap="round"/><path d="M9 13l2 2 4-4" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>`,
-  handshake: `<path d="M4 12 L9 17 L20 6" stroke-width="0"/><path d="M2 11 L8 5 C9 4 10 4 11 5 L13 7 L17 3 C18 2 20 2 21 3 L22 4 C23 5 23 7 22 8 L14 16 C13 17 12 17 11 16 L9 14 L6 17 C5 18 4 18 3 17 L2 16 C1 15 1 12 2 11Z" stroke-width="1.4" stroke-linejoin="round"/>`,
-}
-
-function bezierPath(x1: number, y1: number, x2: number, y2: number) {
-  const cx = (x1 + x2) / 2
-  return `M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`
-}
-
 function ConversionFlowAnimation() {
   const svgRef = useRef<SVGSVGElement>(null)
 
@@ -389,236 +354,330 @@ function ConversionFlowAnimation() {
     const svg = svgRef.current
     if (!svg) return
 
-    const cam = svg.getElementById("cf-cam") as SVGGElement
-    const trunksG = svg.getElementById("cf-trunks") as SVGGElement
-    const trunksA = svg.getElementById("cf-trunks-a") as SVGGElement
-    const shadowsG = svg.getElementById("cf-shadows") as SVGGElement
-    const nodesG = svg.getElementById("cf-nodes") as SVGGElement
-    const pring = svg.getElementById("cf-pring") as SVGCircleElement
-    const pdot = svg.getElementById("cf-pdot") as SVGCircleElement
+    const GROUND_Y = 395
+    const NODE_R_BASE = 38
+    const STEPS = 7
 
-    const ns = "http://www.w3.org/2000/svg"
+    const NODES = [
+      { id: "cursor",    x: 110,  y: 300, z: 0.85, kind: "cursor" },
+      { id: "play",      x: 300,  y: 170, z: 0.45, kind: "play" },
+      { id: "heart",     x: 520,  y: 330, z: 0.95, kind: "heart" },
+      { id: "message",   x: 720,  y: 160, z: 0.30, kind: "message" },
+      { id: "cart",      x: 910,  y: 335, z: 0.90, kind: "cart" },
+      { id: "click",     x: 1120, y: 180, z: 0.50, kind: "click" },
+      { id: "handshake", x: 1300, y: 310, z: 1.00, kind: "handshake" },
+    ]
 
-    // Build trunk paths
-    const paths: SVGPathElement[] = []
-    const pathsA: SVGPathElement[] = []
-    for (let i = 0; i < CF_NODES.length - 1; i++) {
-      const a = CF_NODES[i], b = CF_NODES[i + 1]
-      const d = bezierPath(a.x, a.y, b.x, b.y)
-
-      const p = document.createElementNS(ns, "path")
-      p.setAttribute("d", d)
-      p.setAttribute("fill", "none")
-      p.setAttribute("stroke", "#324b67")
-      p.setAttribute("stroke-width", "1.2")
-      p.setAttribute("opacity", "0.18")
-      trunksG.appendChild(p)
-      paths.push(p)
-
-      const pa = document.createElementNS(ns, "path")
-      pa.setAttribute("d", d)
-      pa.setAttribute("fill", "none")
-      pa.setAttribute("stroke", "#cfb53b")
-      pa.setAttribute("stroke-width", "1.6")
-      pa.setAttribute("opacity", "0")
-      const len = p.getTotalLength()
-      pa.setAttribute("stroke-dasharray", String(len))
-      pa.setAttribute("stroke-dashoffset", String(len))
-      trunksA.appendChild(pa)
-      pathsA.push(pa)
+    const ICON: Record<string, string> = {
+      cursor: `<path class="glyph" d="M -8 -12 L -8 10 L -2 4 L 2 12 L 5 10 L 1 3 L 9 3 Z" />`,
+      play: `
+        <rect class="glyph" x="-16" y="-11" width="32" height="22" rx="1" />
+        <path class="glyph fillable" d="M -3 -5 L 6 0 L -3 5 Z" />
+        <line class="glyph" x1="-16" y1="-5" x2="-12" y2="-5" stroke-opacity="0.35"/>
+        <line class="glyph" x1="12" y1="5" x2="16" y2="5" stroke-opacity="0.35"/>
+      `,
+      heart: `<path class="glyph fillable" d="M 0 11 C -4 6, -14 4, -14 -3 C -14 -9, -8 -11, -4 -8 C -1 -6, 0 -3, 0 -1 C 0 -3, 1 -6, 4 -8 C 8 -11, 14 -9, 14 -3 C 14 4, 4 6, 0 11 Z" />`,
+      message: `
+        <path class="glyph" d="M -16 -10 H 16 V 7 H -4 L -10 13 L -10 7 H -16 Z" />
+        <circle class="glyph" cx="-7" cy="-1" r="1.1" />
+        <circle class="glyph" cx="0"  cy="-1" r="1.1" />
+        <circle class="glyph" cx="7"  cy="-1" r="1.1" />
+      `,
+      cart: `
+        <path class="glyph" d="M -14 -8 L -10 -8 L -7 8 H 12 L 15 -3 H -8" />
+        <circle class="glyph" cx="-5" cy="13" r="2" />
+        <circle class="glyph" cx="10" cy="13" r="2" />
+      `,
+      click: `
+        <path class="glyph" d="M -1 -12 L -1 -2 L -5 -4 C -8 -5 -10 -3 -8 0 L -2 12 H 7 L 10 6 L 10 -4 C 10 -6 8 -7 6 -6 L 6 -1 L 6 -4 C 6 -6 4 -7 2 -6 L 2 -1 L 2 -4 C 2 -6 0 -7 -1 -6" />
+        <path class="glyph" d="M -14 -12 L -10 -10" stroke-opacity="0.35"/>
+        <path class="glyph" d="M 14 -12 L 10 -10" stroke-opacity="0.35"/>
+        <path class="glyph" d="M -14 0 L -10 -2" stroke-opacity="0.35"/>
+      `,
+      handshake: `
+        <path class="glyph" d="M -18 0 L -11 -5 L -4 -3 L 2 1 L -2 5 L -9 3 L -13 6 Z" />
+        <path class="glyph" d="M  18 0 L  11 -5 L  4 -3 L -2 1 L 2 5 L 9 3 L 13 6 Z" />
+        <line class="glyph" x1="-18" y1="0" x2="-22" y2="-2" />
+        <line class="glyph" x1="18"  y1="0" x2="22"  y2="-2" />
+        <line class="glyph" x1="-13" y1="6" x2="-16" y2="9" stroke-opacity="0.35"/>
+        <line class="glyph" x1="13"  y1="6" x2="16"  y2="9" stroke-opacity="0.35"/>
+      `,
     }
 
-    // Build shadow ellipses
-    CF_NODES.forEach((n) => {
-      const e = document.createElementNS(ns, "ellipse")
-      const r = 16 * n.z
-      e.setAttribute("cx", String(n.x))
-      e.setAttribute("cy", String(n.y + 28 * n.z))
-      e.setAttribute("rx", String(r))
-      e.setAttribute("ry", String(r * 0.3))
-      e.setAttribute("fill", "#324b67")
-      e.setAttribute("opacity", String(0.07 * n.z))
-      shadowsG.appendChild(e)
+    function depthScale(z: number)    { return 0.55 + z * 0.55 }
+    function depthOpacity(z: number)  { return 0.45 + z * 0.55 }
+    function depthStroke(z: number)   { return 0.9 + z * 0.9 }
+    function depthShadowOp(z: number) { return 0.04 + z * 0.10 }
+
+    function bezierBetween(a: typeof NODES[0], b: typeof NODES[0]) {
+      const dx = b.x - a.x
+      const c1x = a.x + dx * (0.30 + a.z * 0.15)
+      const c1y = a.y - (1 - a.z) * 20
+      const c2x = b.x - dx * (0.30 + b.z * 0.15)
+      const c2y = b.y - (1 - b.z) * 20
+      return `M ${a.x} ${a.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${b.x} ${b.y}`
+    }
+
+    const ns = "http://www.w3.org/2000/svg"
+    const trunkGroup      = svg.querySelector("#cf-trunk-group")  as SVGGElement
+    const trunkActiveGroup = svg.querySelector("#cf-trunk-active-group") as SVGGElement
+    const shadowsGroup    = svg.querySelector("#cf-shadows-group") as SVGGElement
+    const nodesGroup      = svg.querySelector("#cf-nodes-group")  as SVGGElement
+    const pulseDot        = svg.querySelector("#cf-pulse-dot")    as SVGCircleElement
+    const pulseRing       = svg.querySelector("#cf-pulse-ring")   as SVGCircleElement
+    const cam             = svg.querySelector("#cf-cam")          as SVGGElement
+
+    // Build trunk segments
+    type Seg = { bg: SVGPathElement; fg: SVGPathElement; len: number }
+    const segments: Seg[] = []
+
+    for (let i = 0; i < NODES.length - 1; i++) {
+      const a = NODES[i], b = NODES[i + 1]
+      const d = bezierBetween(a, b)
+      const midZ = (a.z + b.z) / 2
+
+      const bg = document.createElementNS(ns, "path")
+      bg.setAttribute("d", d)
+      bg.setAttribute("class", "cf-trunk")
+      bg.setAttribute("stroke-width", String(depthStroke(midZ) * 0.9))
+      bg.setAttribute("stroke-opacity", String(0.12 + midZ * 0.16))
+      trunkGroup.appendChild(bg)
+
+      const fg = document.createElementNS(ns, "path")
+      fg.setAttribute("d", d)
+      fg.setAttribute("class", "cf-trunk-active")
+      fg.setAttribute("stroke-width", String(depthStroke(midZ) * 1.1))
+      fg.style.filter = `drop-shadow(0 0 ${4 + midZ * 6}px rgba(207,181,59,${0.35 + midZ * 0.35}))`
+      trunkActiveGroup.appendChild(fg)
+
+      const len = bg.getTotalLength()
+      fg.style.strokeDasharray = String(len)
+      fg.style.strokeDashoffset = String(len)
+
+      segments.push({ bg, fg, len })
+    }
+
+    // Shadows
+    NODES.forEach((n) => {
+      const scale = depthScale(n.z)
+      const el = document.createElementNS(ns, "ellipse")
+      el.setAttribute("cx", String(n.x))
+      el.setAttribute("cy", String(GROUND_Y))
+      el.setAttribute("rx", String(NODE_R_BASE * scale * 0.75))
+      el.setAttribute("ry", String(NODE_R_BASE * scale * 0.14))
+      el.setAttribute("class", "cf-node-shadow")
+      el.setAttribute("opacity", String(depthShadowOp(n.z)))
+      shadowsGroup.appendChild(el)
     })
 
-    // Build node groups
-    const nodeEls: SVGGElement[] = []
-    CF_NODES.forEach((n) => {
-      const s = n.z
-      const r = 22 * s
+    // Nodes — rendered sorted by z (far first = behind)
+    const nodeEls: SVGGElement[] = new Array(NODES.length)
+    const nodeHalos: NodeListOf<Element>[] = new Array(NODES.length)
+
+    const zOrder = NODES.map((n, i) => ({ n, i })).sort((a, b) => a.n.z - b.n.z)
+    zOrder.forEach(({ n, i }) => {
+      const scale = depthScale(n.z)
+      const op = depthOpacity(n.z)
 
       const g = document.createElementNS(ns, "g")
-      g.id = `cf-node-${n.id}`
       g.setAttribute("class", "cf-node")
-      g.setAttribute("transform", `translate(${n.x},${n.y})`)
+      g.setAttribute("transform", `translate(${n.x} ${n.y}) scale(${scale})`)
+      g.style.opacity = String(op)
+      if (n.z < 0.45) g.setAttribute("filter", "url(#cf-far-blur)")
 
-      const ring = document.createElementNS(ns, "circle")
-      ring.setAttribute("class", "cf-node-ring")
-      ring.setAttribute("r", String(r))
-      ring.setAttribute("fill", "transparent")
-      ring.setAttribute("stroke", "#324b67")
-      ring.setAttribute("stroke-width", String(1.2 * s))
-      ring.setAttribute("opacity", "0.35")
-      g.appendChild(ring)
-
-      const halo = document.createElementNS(ns, "circle")
-      halo.setAttribute("class", "cf-halo")
-      halo.setAttribute("r", String(r))
-      halo.setAttribute("fill", "none")
-      halo.setAttribute("stroke", "#cfb53b")
-      halo.setAttribute("stroke-width", String(1.5 * s))
-      halo.setAttribute("opacity", "0")
-      g.appendChild(halo)
-
-      const icon = document.createElementNS(ns, "g")
-      icon.setAttribute("class", "cf-glyph")
-      icon.setAttribute("fill", "none")
-      icon.setAttribute("stroke", "#324b67")
-      icon.setAttribute("stroke-width", "1.3")
-      icon.setAttribute("opacity", String(0.55 + 0.4 * s))
-      const sc = (r * 1.25) / 12
-      icon.setAttribute("transform", `scale(${sc}) translate(-12,-12)`)
-      icon.innerHTML = CF_ICONS[n.kind]
-      g.appendChild(icon)
-
-      nodesG.appendChild(g)
-      nodeEls.push(g)
+      g.innerHTML = `
+        <circle class="cf-node-halo" r="${NODE_R_BASE}" />
+        <circle class="cf-node-halo" r="${NODE_R_BASE + 6}" style="animation-delay:120ms"/>
+        <circle class="cf-node-ring" r="${NODE_R_BASE}" stroke-width="1.25" />
+        ${ICON[n.kind]}
+      `
+      nodesGroup.appendChild(g)
+      nodeEls[i] = g
+      nodeHalos[i] = g.querySelectorAll(".cf-node-halo")
     })
 
     // Animation state
-    let raf = 0
-    let t = 0
-    let activeIdx = 0
-    let activeProg = 0
-
-    function activate(idx: number) {
-      activeIdx = idx
-      activeProg = 0
-      nodeEls.forEach((el, i) => {
-        if (i === idx) {
-          el.classList.add("cf-active")
-          const ring = el.querySelector(".cf-node-ring")
-          const halo = el.querySelector(".cf-halo")
-          if (ring) ring.setAttribute("stroke", "#cfb53b")
-          if (halo) {
-            halo.setAttribute("opacity", "0.7")
-            halo.setAttribute("class", "cf-halo cf-burst")
-          }
-        } else if (i < idx) {
-          el.classList.add("cf-active")
-          const ring = el.querySelector(".cf-node-ring")
-          if (ring) ring.setAttribute("stroke", "#cfb53b")
-        } else {
-          el.classList.remove("cf-active")
-          const ring = el.querySelector(".cf-node-ring")
-          const halo = el.querySelector(".cf-halo")
-          if (ring) ring.setAttribute("stroke", "#324b67")
-          if (halo) {
-            halo.setAttribute("opacity", "0")
-            halo.setAttribute("class", "cf-halo")
-          }
-        }
-      })
-      pathsA.forEach((pa, i) => {
-        if (i < idx) {
-          pa.setAttribute("opacity", "0.7")
-          pa.setAttribute("stroke-dashoffset", "0")
-        } else {
-          pa.setAttribute("opacity", "0")
-        }
-      })
+    const state = {
+      progress: 0,
+      speed: 1 / 1500,
+      pauseAtNode: 650,
+      lingerLeft: 0,
+      lastTs: 0,
+      lastActiveIdx: -1,
+      endHold: undefined as number | undefined,
+      t: 0,
     }
 
-    function tick() {
-      t += 0.008
-      activeProg += 0.025
+    function setTrunkProgress(p: number) {
+      for (let i = 0; i < segments.length; i++) {
+        let frac = 0
+        if (p >= i + 1) frac = 1
+        else if (p <= i) frac = 0
+        else frac = p - i
+        segments[i].fg.style.strokeDashoffset = String(segments[i].len * (1 - frac))
+      }
+    }
 
-      // Animate active path
-      if (activeIdx < pathsA.length) {
-        const pa = pathsA[activeIdx]
-        const len = paths[activeIdx].getTotalLength()
-        const off = len * Math.max(0, 1 - activeProg)
-        pa.setAttribute("stroke-dashoffset", String(off))
-        pa.setAttribute("opacity", String(Math.min(0.7, activeProg * 2)))
+    function positionPulse(p: number) {
+      if (p <= 0 || p >= STEPS - 1) {
+        pulseDot.style.opacity = "0"
+        pulseRing.style.opacity = "0"
+        return
+      }
+      const segIdx = Math.floor(p)
+      const frac = p - segIdx
+      const seg = segments[segIdx]
+      if (!seg) return
+      const pt = seg.bg.getPointAtLength(seg.len * frac)
+      const a = NODES[segIdx], b = NODES[segIdx + 1]
+      const z = a.z + (b.z - a.z) * frac
+      const sc = depthScale(z)
+      pulseDot.setAttribute("cx", String(pt.x))
+      pulseDot.setAttribute("cy", String(pt.y))
+      pulseDot.setAttribute("r", String(3.5 * sc))
+      pulseRing.setAttribute("cx", String(pt.x))
+      pulseRing.setAttribute("cy", String(pt.y))
+      pulseRing.setAttribute("r", String(10 * sc))
+      pulseDot.style.filter = `drop-shadow(0 0 ${6 * sc}px rgba(207,181,59,0.9))`
+      const edgeFade = Math.min(frac * 8, (1 - frac) * 8, 1)
+      pulseDot.style.opacity = String(edgeFade)
+      pulseRing.style.opacity = String(edgeFade * 0.5)
+    }
 
-        // Pulse dot along active path
-        const pt = paths[activeIdx].getPointAtLength(len * Math.min(1, activeProg))
-        pring.setAttribute("cx", String(pt.x))
-        pring.setAttribute("cy", String(pt.y))
-        pring.setAttribute("r", "6")
-        pring.style.opacity = String(Math.min(0.8, activeProg * 3))
-        pdot.setAttribute("cx", String(pt.x))
-        pdot.setAttribute("cy", String(pt.y))
-        pdot.style.opacity = String(Math.min(1, activeProg * 3))
+    function setActiveNode(idx: number) {
+      NODES.forEach((_, i) => nodeEls[i].classList.toggle("cf-active", i <= idx))
+      if (idx !== state.lastActiveIdx && idx >= 0 && idx < NODES.length) {
+        nodeHalos[idx].forEach((h) => {
+          h.classList.remove("cf-burst")
+          void (h as HTMLElement).getBoundingClientRect()
+          h.classList.add("cf-burst")
+        })
+        state.lastActiveIdx = idx
+      }
+    }
 
-        if (activeProg >= 1 && activeIdx < CF_NODES.length - 1) {
-          setTimeout(() => activate(activeIdx + 1), 200)
+    function updateCamera(p: number, t: number) {
+      let focusX = 700
+      if (p < STEPS - 1) {
+        const si = Math.floor(p), frac = p - Math.floor(p)
+        const a = NODES[si], b = NODES[si + 1] || NODES[si]
+        focusX = a.x + (b.x - a.x) * frac
+      } else {
+        focusX = NODES[STEPS - 1].x
+      }
+      const offsetX = (700 - focusX) * 0.05
+      const sway = Math.sin(t / 2400) * 4
+      cam.setAttribute("transform", `translate(${offsetX + sway} ${Math.sin(t / 3100) * 2})`)
+    }
+
+    function renderFrame() {
+      setTrunkProgress(state.progress)
+      positionPulse(state.progress)
+      const activeIdx = Math.min(STEPS - 1, Math.floor(state.progress + 0.001))
+      setActiveNode(activeIdx)
+      updateCamera(state.progress, state.t)
+    }
+
+    let raf = 0
+    function tick(ts: number) {
+      if (!state.lastTs) state.lastTs = ts
+      const dt = ts - state.lastTs
+      state.lastTs = ts
+      state.t += dt
+
+      const atNode = Math.abs(state.progress - Math.round(state.progress)) < 0.01
+      if (atNode && state.lingerLeft > 0) {
+        state.lingerLeft -= dt
+      } else {
+        const prev = state.progress
+        state.progress += dt * state.speed
+        if (Math.floor(state.progress) > Math.floor(prev) && state.progress < STEPS - 1) {
+          state.progress = Math.floor(state.progress)
+          state.lingerLeft = state.pauseAtNode
         }
-        if (activeIdx >= CF_NODES.length - 1 && activeProg >= 1) {
-          pring.style.opacity = "0"
-          pdot.style.opacity = "0"
-          // Restart after pause
-          setTimeout(() => {
-            nodeEls.forEach((el) => {
-              el.classList.remove("cf-active")
-              const ring = el.querySelector(".cf-node-ring")
-              const halo = el.querySelector(".cf-halo")
-              if (ring) ring.setAttribute("stroke", "#324b67")
-              if (halo) { halo.setAttribute("opacity", "0"); halo.setAttribute("class", "cf-halo") }
-            })
-            pathsA.forEach((pa) => { pa.setAttribute("opacity", "0"); pa.setAttribute("stroke-dashoffset", pa.getAttribute("stroke-dasharray") || "0") })
-            activate(0)
-          }, 1800)
+        if (state.progress >= STEPS - 1) {
+          state.progress = STEPS - 1
+          if (state.endHold === undefined) state.endHold = 1600
+          state.endHold -= dt
+          if (state.endHold <= 0) {
+            state.progress = 0
+            state.endHold = undefined
+            state.lastActiveIdx = -1
+            NODES.forEach((_, i) => nodeHalos[i].forEach((h) => h.classList.remove("cf-burst")))
+          }
         }
       }
 
-      // Camera sway
-      const swayX = Math.sin(t * 0.4) * 6
-      const swayY = Math.sin(t * 0.27) * 3
-      cam.setAttribute("transform", `translate(${swayX},${swayY})`)
-
+      renderFrame()
       raf = requestAnimationFrame(tick)
     }
 
-    activate(0)
+    renderFrame()
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [])
 
   return (
-    <div className="w-full overflow-hidden rounded-sm">
+    <div className="w-full">
       <style>{`
-        .cf-node-ring { transition: stroke 0.4s; }
-        .cf-glyph { transition: stroke 0.4s; }
-        .cf-node.cf-active .cf-glyph { stroke: #cfb53b; }
-        @keyframes cf-halo {
-          0%   { opacity: 0.7; r: 22px; stroke-width: 2px; }
-          60%  { opacity: 0.2; r: 36px; stroke-width: 1px; }
-          100% { opacity: 0;   r: 44px; stroke-width: 0.5px; }
+        .cf-trunk { fill: none; stroke: #324b67; stroke-linecap: round; }
+        .cf-trunk-active { fill: none; stroke: #cfb53b; stroke-linecap: round; }
+        .cf-node-shadow { fill: #324b67; }
+        .cf-node-ring {
+          fill: transparent; stroke: #324b67; stroke-opacity: 0.35;
+          transition: stroke 350ms cubic-bezier(0.22,1,0.36,1),
+                      stroke-opacity 350ms cubic-bezier(0.22,1,0.36,1);
         }
-        .cf-halo.cf-burst { animation: cf-halo 1400ms ease-out forwards; }
+        .cf-node.cf-active .cf-node-ring { stroke: #cfb53b; stroke-opacity: 1; }
+        .cf-node-halo {
+          fill: none; stroke: #cfb53b; stroke-width: 1; opacity: 0;
+          transform-box: fill-box; transform-origin: center;
+        }
+        .cf-node-halo.cf-burst { animation: cf-halo-burst 1400ms cubic-bezier(0.22,1,0.36,1); }
+        @keyframes cf-halo-burst {
+          0%   { opacity: 0.9; transform: scale(0.9); }
+          60%  { opacity: 0.35; transform: scale(1.3); }
+          100% { opacity: 0; transform: scale(1.5); }
+        }
+        .glyph {
+          fill: none; stroke: #324b67; stroke-opacity: 0.55;
+          stroke-linecap: round; stroke-linejoin: round;
+          transition: stroke 350ms cubic-bezier(0.22,1,0.36,1),
+                      stroke-opacity 350ms cubic-bezier(0.22,1,0.36,1);
+        }
+        .glyph.fillable {
+          transition: fill 350ms cubic-bezier(0.22,1,0.36,1),
+                      stroke 350ms cubic-bezier(0.22,1,0.36,1),
+                      stroke-opacity 350ms cubic-bezier(0.22,1,0.36,1);
+        }
+        .cf-node.cf-active .glyph { stroke: #cfb53b; stroke-opacity: 1; }
+        .cf-node.cf-active .glyph.fillable { fill: #cfb53b; fill-opacity: 0.15; }
       `}</style>
       <svg
         ref={svgRef}
-        viewBox="0 0 1400 480"
-        style={{ width: "100%", aspectRatio: "14/4.8", display: "block" }}
-        aria-hidden="true"
+        viewBox="0 0 1400 500"
+        style={{ width: "100%", height: "auto", display: "block" }}
+        aria-label="Fluxo de conversão animado"
       >
         <defs>
-          <filter id="cf-blur"><feGaussianBlur stdDeviation="0.5" /></filter>
-          <linearGradient id="cf-floor" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#f4f2eb" stopOpacity="0" />
-            <stop offset="100%" stopColor="#f4f2eb" stopOpacity="0.6" />
+          <filter id="cf-far-blur" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="0.6" />
+          </filter>
+          <linearGradient id="cf-horizon" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor="#324b67" stopOpacity="0" />
+            <stop offset="100%" stopColor="#324b67" stopOpacity="0.04" />
           </linearGradient>
         </defs>
-        <rect x="0" y="360" width="1400" height="120" fill="url(#cf-floor)" />
+        <rect x="0" y="330" width="1400" height="170" fill="url(#cf-horizon)" />
         <g id="cf-cam">
-          <g id="cf-shadows" />
-          <g id="cf-trunks" />
-          <g id="cf-trunks-a" />
-          <circle id="cf-pring" r="6" cx="0" cy="0" fill="none" stroke="#cfb53b" strokeWidth="1.5" style={{ opacity: 0 }} />
-          <circle id="cf-pdot" r="3" cx="0" cy="0" fill="#cfb53b" style={{ opacity: 0 }} />
-          <g id="cf-nodes" />
+          <g id="cf-shadows-group" />
+          <g id="cf-trunk-group" />
+          <g id="cf-trunk-active-group" />
+          <g id="cf-pulse-group">
+            <circle id="cf-pulse-ring" fill="none" stroke="#cfb53b" strokeWidth="1" r="10" cx="0" cy="0" style={{ opacity: 0 }} />
+            <circle id="cf-pulse-dot"  fill="#cfb53b" r="3.5" cx="0" cy="0" style={{ opacity: 0 }} />
+          </g>
+          <g id="cf-nodes-group" />
         </g>
       </svg>
     </div>
