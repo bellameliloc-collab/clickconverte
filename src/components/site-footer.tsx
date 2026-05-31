@@ -13,7 +13,7 @@ export function SiteFooter() {
             © 2024 ClickConverte. Todos os direitos reservados.
           </p>
           <p className="text-[10px] text-white/15 font-body mt-1 tracking-wide">
-            CEO: Renata Cardoso
+            Fundadora: Isabella Melilo
           </p>
         </div>
 

@@ -13,7 +13,7 @@ const testimonials = [
   },
   {
     id: 2,
-    quote: "Passei dois anos criando conteúdo sem resultado. A ClickConverte me fez entender que eu não tinha estratégia — tinha apenas publicações. A diferença nos números foi imediata e mensurável.",
+    quote: "Passei dois anos criando conteúdo sem resultado. A ClickConverte me fez entender que eu não tinha estratégia, tinha apenas publicações. A diferença nos números foi imediata e mensurável.",
     author: "Camila R.",
     role: "E-commerce de moda · MG",
   },

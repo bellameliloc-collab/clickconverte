@@ -120,10 +120,10 @@ export default function SobrePage() {
                   Fundadora
                 </span>
                 <h2 className="text-4xl md:text-5xl font-display italic text-primary mb-8">
-                  Renata Cardoso
+                  Isabella Melilo
                 </h2>
                 <p className="text-primary/70 font-body leading-relaxed text-base mb-6">
-                  À frente da ClickConverte, Renata construiu uma agência que pensa diferente: menos barulho, mais estratégia. Com experiência prática em branding, gestão de conteúdo e performance digital, ela lidera cada projeto com o compromisso de transformar presença online em resultado concreto para o cliente.
+                  À frente da ClickConverte, Isabella construiu uma agência que pensa diferente: menos barulho, mais estratégia. Com experiência prática em branding, gestão de conteúdo e performance digital, ela lidera cada projeto com o compromisso de transformar presença online em resultado concreto para o cliente.
                 </p>
                 <p className="text-primary/70 font-body leading-relaxed text-base">
                   Baseada em Belo Horizonte e operando 100% online, a ClickConverte atende marcas em todo o Brasil que cansaram de investir em marketing sem retorno.
