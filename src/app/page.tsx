@@ -143,9 +143,9 @@ function Galaxy() {
         </FadeUp>
       </div>
 
-      {/* Galaxy iframe — contained height */}
+      {/* Galaxy iframe — full bleed, contained height */}
       <div
-        className="relative w-full mx-auto overflow-hidden"
+        className="relative overflow-hidden -mx-6 md:-mx-12"
         style={{ height: "45vh", maxHeight: "480px", minHeight: "280px" }}
       >
         <iframe
