@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,400;1,600;1,700&family=Poppins:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 1080px; height: 1350px; overflow: hidden; background: #f4f2eb; }
+
+    .cover {
+      width: 1080px; height: 1350px;
+      position: relative; overflow: hidden;
+      background: #f4f2eb;
+      display: flex;
+    }
+
+    /* Coluna esquerda — foto */
+    .col-photo {
+      width: 420px; height: 1350px;
+      position: relative; flex-shrink: 0;
+    }
+    .col-photo img {
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: 62% 45%;
+    }
+    /* Fade da foto para a direita */
+    .col-photo::after {
+      content: '';
+      position: absolute; top: 0; right: 0; bottom: 0;
+      width: 120px;
+      background: linear-gradient(to right,
+        rgba(244,242,235,0) 0%,
+        rgba(244,242,235,1) 100%);
+    }
+
+    /* Coluna direita — texto */
+    .col-text {
+      flex: 1;
+      display: flex; flex-direction: column;
+      justify-content: center;
+      padding: 60px 68px 60px 52px;
+    }
+
+    .overline {
+      font-family: 'Poppins', sans-serif;
+      font-size: 11px; font-weight: 600; font-style: normal;
+      letter-spacing: 3.5px; text-transform: uppercase;
+      color: rgba(50,75,103,0.55);
+      margin-bottom: 12px;
+    }
+
+    .serif-large {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-weight: 700;
+      font-size: 58px; line-height: 1.1;
+      color: #1b1c18;
+      margin-bottom: 22px;
+    }
+
+    /* Divisor dourado */
+    .gold-div {
+      width: 44px; height: 2px; background: #cfb53b;
+      margin-bottom: 22px;
+    }
+
+    /* Destaque gold bold */
+    .gold-statement {
+      font-family: 'Poppins', sans-serif;
+      font-style: italic; font-weight: 700;
+      font-size: 32px; line-height: 1.25;
+      color: #cfb53b;
+      margin-bottom: 28px;
+    }
+
+    /* Corpo de texto */
+    .body-text {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 300; font-size: 15px; line-height: 1.75;
+      color: rgba(27,28,24,0.65);
+    }
+    .body-text strong {
+      font-weight: 600; color: #1b1c18;
+    }
+
+    /* Slide num */
+    .counter {
+      position: absolute; bottom: 42px; right: 54px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 11px; font-weight: 300;
+      color: rgba(50,75,103,0.45);
+      letter-spacing: 2px;
+    }
+
+    /* Logo no canto inferior esquerdo no slide claro */
+    .logo-pill {
+      position: absolute; top: 38px; right: 54px;
+      background: rgba(27,28,24,0.08);
+      padding: 8px 18px; border-radius: 4px;
+      border: 1px solid rgba(207,181,59,0.30);
+    }
+    .logo-pill img { height: 20px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="cover">
+    <div class="col-photo">
+      <img src="../Fotosparapost/482E0912-34D9-41B4-AE13-E85915167A59.JPG" alt="">
+    </div>
+
+    <div class="col-text">
+      <p class="overline">O PROBLEMA NÃO É</p>
+      <h2 class="serif-large">falta de<br>conteúdo.</h2>
+      <div class="gold-div"></div>
+      <p class="gold-statement">É falta de curadoria.</p>
+      <p class="body-text">
+        Curadoria é escolher <strong>o que fica</strong> e <strong>o que sai.</strong><br><br>
+        Um post que responde dúvida, mostra bastidor<br>
+        ou prova resultado vale mais do que uma semana<br>
+        de posts motivacionais.<br><br>
+        Consistência de tema constrói autoridade<br>
+        mais rápido do que consistência de frequência.
+      </p>
+    </div>
+
+    <div class="logo-pill">
+      <img src="../public/logo.png" alt="Clickconverte">
+    </div>
+    <div class="counter">3 / 5</div>
+  </div>
+</body>
+</html>

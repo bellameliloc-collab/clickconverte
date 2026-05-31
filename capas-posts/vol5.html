@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,600;1,700&family=Poppins:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 1080px; height: 1350px; overflow: hidden; background: #324b67; }
+
+    .cover {
+      width: 1080px; height: 1350px;
+      position: relative; overflow: hidden;
+      background: #324b67;
+    }
+
+    /* Barra de textura sutil à esquerda */
+    .left-bar {
+      position: absolute; top: 0; left: 0; bottom: 0;
+      width: 6px;
+      background: linear-gradient(to bottom, #cfb53b, rgba(207,181,59,0.2));
+    }
+
+    /* Watermark grande — mais visível em portrait para preencher espaço */
+    .watermark {
+      position: absolute; bottom: -30px; right: -15px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-weight: 700;
+      font-size: 320px; line-height: 1;
+      color: rgba(244,242,235,0.06);
+      letter-spacing: -8px;
+      pointer-events: none; user-select: none;
+    }
+
+    /* Layout: top natural, bottom ancorado ao fundo */
+    .content {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      padding: 110px 80px 100px 86px;
+    }
+
+    .top-section {}
+
+    .overline {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 36px;
+    }
+    .overline-line {
+      display: block; width: 36px; height: 1px; background: #cfb53b;
+    }
+    .overline-text {
+      font-family: 'Poppins', sans-serif;
+      font-size: 12px; font-weight: 300; font-style: normal;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: rgba(207,181,59,0.75);
+    }
+
+    .big-serif {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-weight: 700;
+      font-size: 96px; line-height: 1.04;
+      color: #f4f2eb;
+      text-shadow: 0 3px 20px rgba(0,0,0,0.30);
+      margin-bottom: 32px;
+    }
+
+    /* Linha dourada abaixo do headline, dentro do top-section */
+    .headline-rule {
+      width: 52px; height: 1px;
+      background: rgba(207,181,59,0.50);
+      margin-top: 4px;
+    }
+
+    /* Seção inferior — empurrada para o fundo com margin-top auto */
+    .bottom-section { margin-top: auto; }
+
+    .body-text {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 300; font-size: 18px; line-height: 1.75;
+      color: rgba(244,242,235,0.62);
+      max-width: 680px;
+      margin-bottom: 44px;
+    }
+
+    .cta-box {
+      display: inline-flex; align-items: center; gap: 14px;
+      padding: 18px 32px;
+      border: 1px solid rgba(207,181,59,0.60);
+      border-radius: 4px;
+      background: rgba(207,181,59,0.08);
+      width: fit-content;
+    }
+    .cta-arrow { font-size: 20px; color: #cfb53b; font-weight: 300; }
+    .cta-text {
+      font-family: 'Poppins', sans-serif;
+      font-size: 17px; font-weight: 400; font-style: normal;
+      color: #f4f2eb;
+    }
+    .cta-text strong { font-weight: 700; color: #cfb53b; }
+
+    /* Logo no canto inferior direito */
+    .logo-pill {
+      position: absolute; bottom: 42px; right: 54px;
+      background: rgba(244,242,235,0.12);
+      backdrop-filter: blur(8px);
+      padding: 8px 18px; border-radius: 4px;
+      border: 1px solid rgba(207,181,59,0.25);
+    }
+    .logo-pill img {
+      height: 22px; display: block;
+      filter: brightness(0) invert(1); opacity: 0.80;
+    }
+
+    .counter {
+      position: absolute; bottom: 50px; left: 86px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 11px; font-weight: 300;
+      color: rgba(207,181,59,0.45); letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="cover">
+    <div class="left-bar"></div>
+    <div class="watermark">CC</div>
+
+    <div class="content">
+      <div class="top-section">
+        <div class="overline">
+          <span class="overline-line"></span>
+          <span class="overline-text">Clickconverte</span>
+        </div>
+        <h1 class="big-serif">Cortar é mais<br>difícil do que<br>criar.</h1>
+        <div class="headline-rule"></div>
+      </div>
+
+      <div class="bottom-section">
+        <p class="body-text">
+          E é exatamente o que diferencia<br>
+          uma comunicação que converte<br>
+          de uma que só ocupa espaço.
+        </p>
+        <div class="cta-box">
+          <span class="cta-arrow">→</span>
+          <span class="cta-text">
+            me manda <strong>"CURADORIA"</strong> no direct
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="logo-pill">
+      <img src="../public/logo.png" alt="Clickconverte">
+    </div>
+    <div class="counter">5 / 5</div>
+  </div>
+</body>
+</html>

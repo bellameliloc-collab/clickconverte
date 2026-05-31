@@ -129,48 +129,52 @@ function Hero() {
 // ─── Galaxy ───────────────────────────────────────────────────────────────────
 function Galaxy() {
   return (
-    <section className="relative overflow-hidden" style={{ height: "100svh", minHeight: "600px" }}>
-      {/* Galaxy iframe */}
-      <iframe
-        src="/galaxy.html"
-        className="absolute inset-0 w-full h-full border-0"
-        title="Galaxy Animation"
-        style={{ background: "#0d1520" }}
-      />
-
-      {/* Top gradient fade from hero */}
-      <div
-        className="absolute inset-x-0 top-0 h-32 pointer-events-none z-10"
-        style={{ background: "linear-gradient(to bottom, #f4f2eb, transparent)" }}
-      />
-
-      {/* Text overlay */}
-      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-6 pb-16 gap-10">
-        <FadeUp className="max-w-4xl">
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-display text-white font-medium leading-[1.1]">
+    <section className="bg-primary py-20 px-6 md:px-12">
+      {/* Text above the galaxy */}
+      <div className="max-w-5xl mx-auto text-center mb-12">
+        <FadeUp>
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-display text-[#f4f2eb] font-medium leading-[1.12]">
             Você tem uma galáxia de possibilidades para ter mais{" "}
             <em className="italic text-accent" style={{ fontStyle: "italic" }}>
               lucro e marca
             </em>{" "}
-            com marketing — mas precisa da estratégia de um profissional para isso não virar apenas custo.
+            com marketing, mas precisa da estratégia de um profissional para isso não virar apenas custo.
           </h2>
-        </FadeUp>
-
-        <FadeUp delay={0.2}>
-          <Link
-            href="/sobre"
-            className="inline-block bg-accent text-[#0d1520] px-10 py-5 font-headline font-semibold text-sm tracking-wide rounded-none hover:-translate-y-0.5 transition-all duration-200 hover:bg-accent/90"
-          >
-            Saiba o que fazemos para transformar cliques em conversões
-          </Link>
         </FadeUp>
       </div>
 
-      {/* Bottom gradient fade to next section */}
+      {/* Galaxy iframe — contained height */}
       <div
-        className="absolute inset-x-0 bottom-0 h-32 pointer-events-none z-10"
-        style={{ background: "linear-gradient(to top, #faf9f4, transparent)" }}
-      />
+        className="relative w-full mx-auto overflow-hidden"
+        style={{ height: "45vh", maxHeight: "480px", minHeight: "280px" }}
+      >
+        <iframe
+          src="/galaxy.html"
+          className="absolute inset-0 w-full h-full border-0"
+          title="Galaxy Animation"
+          style={{ background: "#0d1520" }}
+        />
+        {/* Fade top edge into section bg */}
+        <div
+          className="absolute inset-x-0 top-0 h-20 pointer-events-none z-10"
+          style={{ background: "linear-gradient(to bottom, #324b67, transparent)" }}
+        />
+        {/* Fade bottom edge into section bg */}
+        <div
+          className="absolute inset-x-0 bottom-0 h-20 pointer-events-none z-10"
+          style={{ background: "linear-gradient(to top, #324b67, transparent)" }}
+        />
+      </div>
+
+      {/* Button centered below */}
+      <FadeUp delay={0.15} className="flex justify-center mt-12">
+        <Link
+          href="/sobre"
+          className="inline-block bg-accent text-[#0d1520] px-10 py-5 font-headline font-semibold text-sm tracking-wide rounded-none hover:-translate-y-0.5 transition-all duration-200 hover:bg-accent/90"
+        >
+          Saiba o que fazemos para transformar cliques em conversões
+        </Link>
+      </FadeUp>
     </section>
   )
 }
@@ -217,7 +221,7 @@ function ServiceCard({ title, desc, index }: { title: string; desc: string; inde
         onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
       >
         <summary className="flex justify-between items-center cursor-pointer list-none">
-          <h3 className="text-lg font-headline font-semibold text-primary">{title}</h3>
+          <h3 className="text-lg font-headline font-semibold text-[#f4f2eb]">{title}</h3>
           <span
             className="card-icon-plus text-accent text-2xl font-light select-none"
             aria-hidden
@@ -225,7 +229,7 @@ function ServiceCard({ title, desc, index }: { title: string; desc: string; inde
             +
           </span>
         </summary>
-        <div className="card-content mt-6 text-primary/70 font-body leading-relaxed text-sm">
+        <div className="card-content mt-6 text-[#f4f2eb]/70 font-body leading-relaxed text-sm">
           {desc}
         </div>
       </details>
@@ -235,13 +239,13 @@ function ServiceCard({ title, desc, index }: { title: string; desc: string; inde
 
 function Servicos() {
   return (
-    <section id="servicos" className="py-14 md:py-20 px-6 md:px-12 bg-[#faf9f4]">
+    <section id="servicos" className="py-14 md:py-20 px-6 md:px-12 bg-primary">
       <div className="max-w-7xl mx-auto">
         <FadeUp>
           <span className="text-xs uppercase tracking-[0.2em] text-accent font-headline font-bold mb-4 block">
             Serviços
           </span>
-          <h2 className="text-4xl md:text-6xl font-display text-primary font-medium mb-12">
+          <h2 className="text-4xl md:text-6xl font-display text-[#f4f2eb] font-medium mb-12">
             Soluções sob medida para o seu negócio
           </h2>
         </FadeUp>
@@ -255,7 +259,7 @@ function Servicos() {
         <FadeUp delay={0.3} className="mt-12">
           <a
             href="#contato"
-            className="inline-block bg-primary text-white px-12 py-5 font-headline font-semibold text-sm tracking-wide rounded-none hover:-translate-y-0.5 transition-all duration-200 hover:bg-primary/90"
+            className="inline-block bg-[#f4f2eb] text-primary px-12 py-5 font-headline font-semibold text-sm tracking-wide rounded-none hover:-translate-y-0.5 transition-all duration-200 hover:bg-[#f4f2eb]/90"
           >
             Solicitar diagnóstico gratuito
           </a>
@@ -536,11 +540,11 @@ function ConversionFlowAnimation() {
     <div className="w-full overflow-x-auto md:overflow-visible">
       <div className="min-w-[700px] md:min-w-0">
       <style>{`
-        .cf-trunk { fill: none; stroke: #324b67; stroke-linecap: round; }
+        .cf-trunk { fill: none; stroke: rgba(244,242,235,0.3); stroke-linecap: round; }
         .cf-trunk-active { fill: none; stroke: #cfb53b; stroke-linecap: round; }
-        .cf-node-shadow { fill: #324b67; }
+        .cf-node-shadow { fill: rgba(244,242,235,0.12); }
         .cf-node-ring {
-          fill: transparent; stroke: #324b67; stroke-opacity: 0.35;
+          fill: transparent; stroke: rgba(244,242,235,0.4); stroke-opacity: 1;
           transition: stroke 350ms cubic-bezier(0.22,1,0.36,1),
                       stroke-opacity 350ms cubic-bezier(0.22,1,0.36,1);
         }
@@ -556,7 +560,7 @@ function ConversionFlowAnimation() {
           100% { opacity: 0; transform: scale(1.5); }
         }
         .glyph {
-          fill: none; stroke: #324b67; stroke-opacity: 0.55;
+          fill: none; stroke: #f4f2eb; stroke-opacity: 0.5;
           stroke-linecap: round; stroke-linejoin: round;
           transition: stroke 350ms cubic-bezier(0.22,1,0.36,1),
                       stroke-opacity 350ms cubic-bezier(0.22,1,0.36,1);
@@ -604,7 +608,7 @@ function ConversionFlowAnimation() {
 // ─── Cases ────────────────────────────────────────────────────────────────────
 function Cases() {
   return (
-    <section id="cases" className="bg-surface py-14 md:py-20 px-6 md:px-12">
+    <section id="cases" className="bg-primary py-14 md:py-20 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
         <FadeUp>
           <span className="text-xs uppercase tracking-[0.2em] text-accent font-headline font-bold mb-6 block">
@@ -615,12 +619,13 @@ function Cases() {
 
       <TextRevealByWord
         text="Resultados que falam por si"
+        color="#f4f2eb"
         className="max-w-7xl mx-auto px-6 md:px-12"
       />
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 mt-8">
         <FadeUp delay={0.1}>
-          <p className="text-lg md:text-xl text-primary/70 font-body leading-relaxed max-w-4xl mb-12">
+          <p className="text-lg md:text-xl text-[#f4f2eb]/70 font-body leading-relaxed max-w-4xl mb-12">
             Ao longo da nossa trajetória, construímos resultados expressivos para negócios de
             diferentes segmentos — do varejo físico ao digital, de profissionais autônomos a
             empresas em expansão. Trabalhamos com marcas que precisavam ir além da presença online e
@@ -633,7 +638,7 @@ function Cases() {
         </FadeUp>
 
         <FadeUp delay={0.15}>
-          <h3 className="text-3xl md:text-4xl font-display italic text-primary mb-8">
+          <h3 className="text-3xl md:text-4xl font-display italic text-[#f4f2eb] mb-8">
             Todas as ações para a conversão
           </h3>
           <ConversionFlowAnimation />
@@ -642,7 +647,7 @@ function Cases() {
         <FadeUp delay={0.1} className="mt-16 text-center">
           <a
             href="#contato"
-            className="relative font-headline text-primary/80 text-sm font-medium group"
+            className="relative font-headline text-[#f4f2eb]/70 text-sm font-medium group"
           >
             Quer fazer parte dessa história?
             <span className="absolute bottom-0 left-0 w-full h-[1px] bg-accent scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
@@ -656,13 +661,13 @@ function Cases() {
 // ─── Testimonials section ─────────────────────────────────────────────────────
 function TestimonialsSection() {
   return (
-    <section className="py-14 md:py-20 px-6 md:px-12 bg-[#faf9f4]">
+    <section className="py-14 md:py-20 px-6 md:px-12 bg-primary">
       <div className="max-w-7xl mx-auto">
         <FadeUp>
           <span className="text-xs uppercase tracking-[0.2em] text-accent font-headline font-bold mb-4 block text-center">
             Depoimentos
           </span>
-          <h2 className="text-4xl md:text-5xl font-display italic text-primary font-medium text-center mb-2">
+          <h2 className="text-4xl md:text-5xl font-display italic text-[#f4f2eb] font-medium text-center mb-2">
             O que dizem nossos clientes
           </h2>
         </FadeUp>
@@ -695,13 +700,13 @@ const faqItems = [
 
 function FAQ() {
   return (
-    <section id="faq" className="bg-[#faf9f4] py-14 md:py-20 px-6 md:px-12">
+    <section id="faq" className="bg-primary py-14 md:py-20 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
         <FadeUp>
           <span className="text-xs uppercase tracking-[0.2em] text-accent font-headline font-bold mb-6 block">
             FAQ
           </span>
-          <h2 className="text-4xl md:text-5xl font-display text-primary font-medium mb-12">
+          <h2 className="text-4xl md:text-5xl font-display text-[#f4f2eb] font-medium mb-12">
             Perguntas frequentes
           </h2>
         </FadeUp>
@@ -710,14 +715,14 @@ function FAQ() {
           <Accordion
             type="single"
             collapsible
-            className="w-full border-t border-primary/10"
+            className="w-full border-t border-[#f4f2eb]/20"
           >
             {faqItems.map((item, i) => (
-              <AccordionItem key={i} value={`faq-${i}`} className="border-b border-primary/10">
-                <AccordionTrigger className="text-left text-base md:text-lg font-headline font-semibold text-primary py-6 hover:text-accent transition-colors [&[data-state=open]>svg]:text-accent">
+              <AccordionItem key={i} value={`faq-${i}`} className="border-b border-[#f4f2eb]/20">
+                <AccordionTrigger className="text-left text-base md:text-lg font-headline font-semibold text-[#f4f2eb] py-6 hover:text-accent transition-colors [&[data-state=open]>svg]:text-accent [&>svg]:text-[#f4f2eb]/50">
                   {item.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-primary/70 font-body text-sm md:text-base leading-relaxed">
+                <AccordionContent className="text-[#f4f2eb]/70 font-body text-sm md:text-base leading-relaxed">
                   {item.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -764,7 +769,7 @@ function Contato() {
     "w-full bg-transparent border-0 border-b border-white/20 py-4 text-white placeholder:text-white/30 focus:outline-none focus:border-accent transition-colors duration-300 font-body text-sm"
 
   return (
-    <section id="contato" className="py-14 md:py-20 px-6 md:px-12 bg-primary">
+    <section id="contato" className="py-14 md:py-20 px-6 md:px-12 bg-[#1e2e40]">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-24 items-start">
         <FadeUp>
           <h2 className="text-5xl md:text-7xl font-display text-white mb-8 font-medium leading-tight">

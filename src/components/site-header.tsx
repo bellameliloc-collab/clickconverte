@@ -27,7 +27,7 @@ export function SiteHeader({ basePath = "" }: { basePath?: string }) {
   return (
     <header
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-[#f4f2eb]/90 backdrop-blur-md shadow-sm" : "bg-transparent"
+        scrolled ? "bg-primary/95 backdrop-blur-md shadow-sm" : "bg-transparent"
       }`}
     >
       <nav className="flex justify-between items-center px-6 py-3 w-full max-w-7xl mx-auto">
@@ -47,7 +47,9 @@ export function SiteHeader({ basePath = "" }: { basePath?: string }) {
             <a
               key={l.href}
               href={l.href}
-              className="font-headline text-sm text-primary/70 hover:text-accent transition-colors duration-200"
+              className={`font-headline text-sm transition-colors duration-200 hover:text-accent ${
+                scrolled ? "text-[#f4f2eb]/80" : "text-primary/70"
+              }`}
             >
               {l.label}
             </a>
@@ -61,15 +63,15 @@ export function SiteHeader({ basePath = "" }: { basePath?: string }) {
         >
           <motion.span
             animate={open ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }}
-            className="block w-6 h-[1.5px] bg-primary"
+            className={`block w-6 h-[1.5px] ${scrolled ? "bg-[#f4f2eb]" : "bg-primary"}`}
           />
           <motion.span
             animate={open ? { opacity: 0 } : { opacity: 1 }}
-            className="block w-6 h-[1.5px] bg-primary"
+            className={`block w-6 h-[1.5px] ${scrolled ? "bg-[#f4f2eb]" : "bg-primary"}`}
           />
           <motion.span
             animate={open ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }}
-            className="block w-6 h-[1.5px] bg-primary"
+            className={`block w-6 h-[1.5px] ${scrolled ? "bg-[#f4f2eb]" : "bg-primary"}`}
           />
         </button>
       </nav>
@@ -80,7 +82,7 @@ export function SiteHeader({ basePath = "" }: { basePath?: string }) {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-[#f4f2eb]/95 backdrop-blur-md border-t border-primary/5"
+            className="md:hidden bg-primary/98 backdrop-blur-md border-t border-[#f4f2eb]/10"
           >
             <div className="flex flex-col px-6 py-6 gap-5">
               {links.map((l) => (
@@ -88,7 +90,7 @@ export function SiteHeader({ basePath = "" }: { basePath?: string }) {
                   key={l.href}
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="font-headline text-primary/80 hover:text-accent transition-colors"
+                  className="font-headline text-[#f4f2eb]/80 hover:text-accent transition-colors"
                 >
                   {l.label}
                 </a>

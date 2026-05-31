@@ -1,0 +1,28 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@1,300;1,400;1,700;1,800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { width:1080px; height:1350px; overflow:hidden; background:#1b1c18; }
+.cover { width:1080px; height:1350px; position:relative; font-family:'Poppins',sans-serif; overflow:hidden; }
+.bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 55%; }
+.overlay { position:absolute; inset:0; background: linear-gradient(168deg,rgba(27,28,24,.08)0%,rgba(27,28,24,.35)44%,rgba(27,28,24,.88)100%), linear-gradient(to right,rgba(50,75,103,.20)0%,rgba(50,75,103,0)58%); }
+.content { position:absolute; bottom:0; left:0; right:0; padding:0 64px 72px; }
+.tag { display:flex; align-items:center; gap:14px; font-style:italic; font-weight:400; font-size:13px; color:#cfb53b; letter-spacing:3.5px; text-transform:uppercase; margin-bottom:22px; }
+.tag::before { content:''; display:block; width:36px; height:1px; background:#cfb53b; flex-shrink:0; }
+h1 { font-style:italic; font-weight:700; font-size:62px; line-height:1.18; color:#f4f2eb; text-shadow:0 3px 20px rgba(0,0,0,.55); max-width:900px; margin-bottom:0; }
+.logo-pill { position:absolute; top:44px; right:54px; background:rgba(244,242,235,.92); backdrop-filter:blur(8px); padding:9px 20px; border-radius:5px; border:1px solid rgba(207,181,59,.35); box-shadow:0 6px 24px rgba(0,0,0,.35),0 2px 8px rgba(0,0,0,.20); }
+.logo-pill img { height:24px; display:block; }
+.watermark { position:absolute; bottom:-20px; right:-10px; font-family:'Poppins',sans-serif; font-style:italic; font-weight:800; font-size:180px; line-height:1; color:rgba(207,181,59,.07); letter-spacing:-4px; pointer-events:none; user-select:none; white-space:nowrap; }
+</style></head><body>
+<div class="cover">
+  <img class="bg" src="../Fotosparapost/8E7D24E1-6F15-40FC-9132-03F81AAA31FD.JPG" alt="">
+  <div class="overlay"></div>
+  <div class="content">
+    <div class="tag">Ferramentas</div>
+    <h1>Você tem 30 ferramentas<br>e nenhum processo.</h1>
+  </div>
+  <div class="logo-pill"><img src="../public/logo.png" alt="Clickconverte"></div>
+  <div class="watermark">CC</div>
+</div></body></html>

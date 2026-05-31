@@ -46,20 +46,20 @@ export function Testimonials() {
   return (
     <div className="flex flex-col items-center gap-10 py-16">
       <div className="relative px-8">
-        <span className="absolute -left-2 -top-6 text-7xl font-serif text-foreground/[0.06] select-none pointer-events-none">
+        <span className="absolute -left-2 -top-6 text-7xl font-serif text-[#f4f2eb]/10 select-none pointer-events-none">
           &ldquo;
         </span>
 
         <p
           className={cn(
-            "text-2xl md:text-3xl font-display italic text-primary text-center max-w-2xl leading-relaxed transition-all duration-400 ease-out",
+            "text-2xl md:text-3xl font-display italic text-[#f4f2eb] text-center max-w-2xl leading-relaxed transition-all duration-400 ease-out",
             isAnimating ? "opacity-0 blur-sm scale-[0.98]" : "opacity-100 blur-0 scale-100",
           )}
         >
           {displayedQuote}
         </p>
 
-        <span className="absolute -right-2 -bottom-8 text-7xl font-serif text-foreground/[0.06] select-none pointer-events-none">
+        <span className="absolute -right-2 -bottom-8 text-7xl font-serif text-[#f4f2eb]/10 select-none pointer-events-none">
           &rdquo;
         </span>
       </div>
@@ -67,7 +67,7 @@ export function Testimonials() {
       <div className="flex flex-col items-center gap-6 mt-2">
         <p
           className={cn(
-            "text-xs text-primary/40 tracking-[0.2em] uppercase font-headline transition-all duration-500 ease-out",
+            "text-xs text-[#f4f2eb]/50 tracking-[0.2em] uppercase font-headline transition-all duration-500 ease-out",
             isAnimating ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0",
           )}
         >
@@ -89,21 +89,21 @@ export function Testimonials() {
                 className={cn(
                   "relative flex items-center gap-0 rounded-full cursor-pointer",
                   "transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]",
-                  isActive ? "bg-primary shadow-lg" : "bg-transparent hover:bg-primary/5",
+                  isActive ? "bg-[#f4f2eb] shadow-lg" : "bg-transparent hover:bg-[#f4f2eb]/10",
                   showName ? "pr-4 pl-2 py-2" : "p-0.5",
                 )}
               >
                 <div
                   className={cn(
                     "relative flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
-                    "transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]",
-                    isActive ? "bg-primary/20 ring-2 ring-accent/40" : "bg-primary/8",
+                    "transition-all duration-500",
+                    isActive ? "bg-primary/10 ring-2 ring-accent/50" : "bg-[#f4f2eb]/10",
                   )}
                 >
                   <UserCircle
                     className={cn(
                       "w-7 h-7 transition-colors duration-300",
-                      isActive ? "text-white" : "text-primary/50",
+                      isActive ? "text-primary" : "text-[#f4f2eb]/60",
                     )}
                     strokeWidth={1.2}
                   />
@@ -120,7 +120,7 @@ export function Testimonials() {
                       className={cn(
                         "text-sm font-headline font-medium whitespace-nowrap block",
                         "transition-colors duration-300",
-                        isActive ? "text-white" : "text-primary",
+                        isActive ? "text-primary" : "text-[#f4f2eb]",
                       )}
                     >
                       {testimonial.author}
