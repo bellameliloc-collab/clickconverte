@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galaxy</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0d1520; }
+    canvas { display: block; }
+    #webgpu-fallback {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: #0d1520;
+    }
+    #webgpu-fallback .stars {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(1px 1px at 10% 20%, rgba(207,181,59,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 60%, rgba(168,196,224,0.4) 0%, transparent 100%),
+        radial-gradient(2px 2px at 50% 15%, rgba(207,181,59,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 75%, rgba(207,181,59,0.4) 0%, transparent 100%),
+        radial-gradient(2px 2px at 20% 80%, rgba(168,196,224,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 55%, rgba(255,255,255,0.25) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 30%, rgba(207,181,59,0.3) 0%, transparent 100%);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="webgpu-fallback">
+    <div class="stars"></div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.webgpu.js",
+      "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.webgpu.js",
+      "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.tsl.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.181.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    async function checkWebGPUSupport() {
+      if (!navigator.gpu) return false;
+      try {
+        const adapter = await navigator.gpu.requestAdapter();
+        return !!adapter;
+      } catch { return false; }
+    }
+
+    const webGPUSupported = await checkWebGPUSupport();
+    if (!webGPUSupported) {
+      document.getElementById('webgpu-fallback').style.display = 'flex';
+      throw new Error('WebGPU not supported');
+    }
+
+    import * as THREE from 'three/webgpu';
+    import { pass } from 'three/tsl';
+    import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import {
+      uniform, instancedArray, instanceIndex, vec3, vec4, float, Fn,
+      mix, length, sin, cos, uv, smoothstep, texture, normalize, fract
+    } from 'three/tsl';
+
+    const hash = Fn(([seed]) => {
+      const p = fract(seed.mul(0.1031));
+      const h = p.add(19.19);
+      return fract(h.mul(h.add(47.43)).mul(p));
+    });
+
+    const rotateXZ = Fn(([position, angle]) => {
+      const cosTheta = cos(angle);
+      const sinTheta = sin(angle);
+      const newX = position.x.mul(cosTheta).sub(position.z.mul(sinTheta));
+      const newZ = position.x.mul(sinTheta).add(position.z.mul(cosTheta));
+      return vec3(newX, position.y, newZ);
+    });
+
+    const applyDifferentialRotation = Fn(([position, rotationSpeed, deltaTime]) => {
+      const distFromCenter = length(vec3(position.x, 0, position.z));
+      const rotationFactor = float(1.0).div(distFromCenter.mul(0.1).add(1.0));
+      const angularSpeed = rotationSpeed.mul(rotationFactor).mul(deltaTime).negate();
+      return rotateXZ(position, angularSpeed);
+    });
+
+    const applyMouseForce = Fn(([position, mouse, mouseActive, mouseForce, mouseRadius, deltaTime]) => {
+      const toMouse = mouse.sub(position);
+      const distToMouse = length(toMouse);
+      const mouseInfluence = mouseActive.mul(float(1.0).sub(distToMouse.div(mouseRadius)).max(0.0));
+      const mouseDir = normalize(toMouse);
+      return mouseDir.mul(mouseForce).mul(mouseInfluence).mul(deltaTime).negate();
+    });
+
+    const applySpringForce = Fn(([currentPos, targetPos, strength, deltaTime]) => {
+      const toTarget = targetPos.sub(currentPos);
+      return toTarget.mul(strength).mul(deltaTime);
+    });
+
+    class GalaxySimulation {
+      constructor(scene, config, cloudTexture = null) {
+        this.scene = scene;
+        this.config = config;
+        this.COUNT = config.starCount;
+        this.cloudTexture = cloudTexture;
+        this.initializeUniforms(config);
+        this.initialized = false;
+        this.cloudInitialized = false;
+      }
+
+      initializeUniforms(config) {
+        this.uniforms = {
+          compute: {
+            time: uniform(0),
+            deltaTime: uniform(0.016),
+            mouse: uniform(new THREE.Vector3(0, 0, 0)),
+            mouseActive: uniform(0.0),
+            mouseForce: uniform(config.mouseForce),
+            mouseRadius: uniform(config.mouseRadius),
+            rotationSpeed: uniform(config.rotationSpeed)
+          },
+          galaxy: {
+            radius: uniform(config.galaxyRadius),
+            thickness: uniform(config.galaxyThickness || 0.1),
+            spiralTightness: uniform(config.spiralTightness),
+            armCount: uniform(config.armCount),
+            armWidth: uniform(config.armWidth),
+            randomness: uniform(config.randomness)
+          },
+          visual: {
+            particleSize: uniform(config.particleSize),
+            cloudSize: uniform(config.cloudSize),
+            cloudOpacity: uniform(config.cloudOpacity !== undefined ? config.cloudOpacity : 0.5),
+            starBrightness: uniform(config.starBrightness !== undefined ? config.starBrightness : 1.0),
+            denseStarColor: uniform(new THREE.Color(config.denseStarColor || '#99ccff')),
+            sparseStarColor: uniform(new THREE.Color(config.sparseStarColor || '#ffb380')),
+            cloudTintColor: uniform(new THREE.Color(config.cloudTintColor || '#6ba8cc'))
+          }
+        };
+      }
+
+      createGalaxySystem() {
+        if (this.galaxy) {
+          this.scene.remove(this.galaxy);
+          if (this.galaxy.material) this.galaxy.material.dispose();
+        }
+
+        this.spawnPositionBuffer = instancedArray(this.COUNT, 'vec3');
+        this.originalPositionBuffer = instancedArray(this.COUNT, 'vec3');
+        this.velocityBuffer = instancedArray(this.COUNT, 'vec3');
+        this.densityFactorBuffer = instancedArray(this.COUNT, 'float');
+
+        this.computeInit = Fn(() => {
+          const idx = instanceIndex;
+          const seed = idx.toFloat();
+          const radius = hash(seed.add(1)).pow(0.5).mul(this.uniforms.galaxy.radius);
+          const normalizedRadius = radius.div(this.uniforms.galaxy.radius);
+          const armIndex = hash(seed.add(2)).mul(this.uniforms.galaxy.armCount).floor();
+          const armAngle = armIndex.mul(6.28318).div(this.uniforms.galaxy.armCount);
+          const spiralAngle = normalizedRadius.mul(this.uniforms.galaxy.spiralTightness).mul(6.28318);
+          const angleOffset = hash(seed.add(3)).sub(0.5).mul(this.uniforms.galaxy.randomness);
+          const radiusOffset = hash(seed.add(4)).sub(0.5).mul(this.uniforms.galaxy.armWidth);
+          const angle = armAngle.add(spiralAngle).add(angleOffset);
+          const offsetRadius = radius.add(radiusOffset);
+          const x = cos(angle).mul(offsetRadius);
+          const z = sin(angle).mul(offsetRadius);
+          const thicknessFactor = float(1.0).sub(normalizedRadius).add(0.2);
+          const y = hash(seed.add(5)).sub(0.5).mul(this.uniforms.galaxy.thickness).mul(thicknessFactor);
+          const position = vec3(x, y, z);
+          this.spawnPositionBuffer.element(idx).assign(position);
+          this.originalPositionBuffer.element(idx).assign(position);
+          const orbitalSpeed = float(1.0).div(offsetRadius.add(0.5)).mul(5.0);
+          const vx = sin(angle).mul(orbitalSpeed).negate();
+          const vz = cos(angle).mul(orbitalSpeed);
+          this.velocityBuffer.element(idx).assign(vec3(vx, 0, vz));
+          const radialSparsity = radiusOffset.abs().div(this.uniforms.galaxy.armWidth.mul(0.5).add(0.01));
+          const angularSparsity = angleOffset.abs().div(this.uniforms.galaxy.randomness.mul(0.5).add(0.01));
+          const sparsityFactor = radialSparsity.add(angularSparsity).mul(0.5).min(1.0);
+          this.densityFactorBuffer.element(idx).assign(sparsityFactor);
+        })().compute(this.COUNT);
+
+        this.computeUpdate = Fn(() => {
+          const idx = instanceIndex;
+          const position = this.spawnPositionBuffer.element(idx).toVar();
+          const originalPos = this.originalPositionBuffer.element(idx);
+          const rotatedPos = applyDifferentialRotation(position, this.uniforms.compute.rotationSpeed, this.uniforms.compute.deltaTime);
+          position.assign(rotatedPos);
+          const rotatedOriginal = applyDifferentialRotation(originalPos, this.uniforms.compute.rotationSpeed, this.uniforms.compute.deltaTime);
+          this.originalPositionBuffer.element(idx).assign(rotatedOriginal);
+          const mouseForce = applyMouseForce(position, this.uniforms.compute.mouse, this.uniforms.compute.mouseActive, this.uniforms.compute.mouseForce, this.uniforms.compute.mouseRadius, this.uniforms.compute.deltaTime);
+          position.addAssign(mouseForce);
+          const springForce = applySpringForce(position, rotatedOriginal, float(2.0), this.uniforms.compute.deltaTime);
+          position.addAssign(springForce);
+          this.spawnPositionBuffer.element(idx).assign(position);
+        })().compute(this.COUNT);
+
+        const spriteMaterial = new THREE.SpriteNodeMaterial();
+        spriteMaterial.transparent = false;
+        spriteMaterial.depthWrite = false;
+        spriteMaterial.blending = THREE.AdditiveBlending;
+
+        const starPos = this.spawnPositionBuffer.toAttribute();
+        const densityFactor = this.densityFactorBuffer.toAttribute();
+
+        const circleShape = Fn(() => {
+          const center = uv().sub(0.5).mul(2.0);
+          const dist = length(center);
+          return smoothstep(1.0, 0.0, dist).mul(smoothstep(1.0, 0.3, dist));
+        })();
+
+        const starColorNode = mix(
+          vec3(this.uniforms.visual.denseStarColor),
+          vec3(this.uniforms.visual.sparseStarColor),
+          densityFactor
+        ).mul(this.uniforms.visual.starBrightness);
+
+        spriteMaterial.positionNode = starPos;
+        spriteMaterial.colorNode = vec4(starColorNode.x, starColorNode.y, starColorNode.z, float(1.0));
+        spriteMaterial.opacityNode = circleShape;
+        spriteMaterial.scaleNode = this.uniforms.visual.particleSize;
+
+        this.galaxy = new THREE.Sprite(spriteMaterial);
+        this.galaxy.count = this.COUNT;
+        this.galaxy.frustumCulled = false;
+        this.scene.add(this.galaxy);
+      }
+
+      createClouds() {
+        if (this.cloudPlane) {
+          this.scene.remove(this.cloudPlane);
+          if (this.cloudPlane.material) this.cloudPlane.material.dispose();
+        }
+
+        const CLOUD_COUNT = this.config.cloudCount;
+        const cloudPositionBuffer = instancedArray(CLOUD_COUNT, 'vec3');
+        const cloudOriginalPositionBuffer = instancedArray(CLOUD_COUNT, 'vec3');
+        const cloudColorBuffer = instancedArray(CLOUD_COUNT, 'vec3');
+        const cloudSizeBuffer = instancedArray(CLOUD_COUNT, 'float');
+        const cloudRotationBuffer = instancedArray(CLOUD_COUNT, 'float');
+
+        this.cloudInit = Fn(() => {
+          const idx = instanceIndex;
+          const seed = idx.toFloat().add(10000);
+          const radius = hash(seed.add(1)).pow(0.7).mul(this.uniforms.galaxy.radius);
+          const normalizedRadius = radius.div(this.uniforms.galaxy.radius);
+          const armIndex = hash(seed.add(2)).mul(this.uniforms.galaxy.armCount).floor();
+          const armAngle = armIndex.mul(6.28318).div(this.uniforms.galaxy.armCount);
+          const spiralAngle = normalizedRadius.mul(this.uniforms.galaxy.spiralTightness).mul(6.28318);
+          const angleOffset = hash(seed.add(3)).sub(0.5).mul(this.uniforms.galaxy.randomness);
+          const radiusOffset = hash(seed.add(4)).sub(0.5).mul(this.uniforms.galaxy.armWidth);
+          const angle = armAngle.add(spiralAngle).add(angleOffset);
+          const offsetRadius = radius.add(radiusOffset);
+          const x = cos(angle).mul(offsetRadius);
+          const z = sin(angle).mul(offsetRadius);
+          const thicknessFactor = float(1.0).sub(normalizedRadius).add(0.15);
+          const y = hash(seed.add(5)).sub(0.5).mul(this.uniforms.galaxy.thickness).mul(thicknessFactor);
+          const position = vec3(x, y, z);
+          cloudPositionBuffer.element(idx).assign(position);
+          cloudOriginalPositionBuffer.element(idx).assign(position);
+          const tintColor = vec3(this.uniforms.visual.cloudTintColor);
+          const cloudColor = tintColor.mul(float(1.0).sub(normalizedRadius.mul(0.3)));
+          cloudColorBuffer.element(idx).assign(cloudColor);
+          const densityFactor = float(1.0).sub(normalizedRadius.mul(0.5));
+          const size = hash(seed.add(6)).mul(0.5).add(0.7).mul(densityFactor);
+          cloudSizeBuffer.element(idx).assign(size);
+          const rotation = hash(seed.add(7)).mul(6.28318);
+          cloudRotationBuffer.element(idx).assign(rotation);
+        })().compute(CLOUD_COUNT);
+
+        this.cloudUpdate = Fn(() => {
+          const idx = instanceIndex;
+          const position = cloudPositionBuffer.element(idx).toVar();
+          const originalPos = cloudOriginalPositionBuffer.element(idx);
+          const rotatedPos = applyDifferentialRotation(position, this.uniforms.compute.rotationSpeed, this.uniforms.compute.deltaTime);
+          position.assign(rotatedPos);
+          const rotatedOriginal = applyDifferentialRotation(originalPos, this.uniforms.compute.rotationSpeed, this.uniforms.compute.deltaTime);
+          cloudOriginalPositionBuffer.element(idx).assign(rotatedOriginal);
+          const mouseForce = applyMouseForce(position, this.uniforms.compute.mouse, this.uniforms.compute.mouseActive, this.uniforms.compute.mouseForce, this.uniforms.compute.mouseRadius, this.uniforms.compute.deltaTime);
+          position.addAssign(mouseForce);
+          const springForce = applySpringForce(position, rotatedOriginal, float(1.0), this.uniforms.compute.deltaTime);
+          position.addAssign(springForce);
+          cloudPositionBuffer.element(idx).assign(position);
+        })().compute(CLOUD_COUNT);
+
+        const cloudMaterial = new THREE.SpriteNodeMaterial();
+        cloudMaterial.transparent = true;
+        cloudMaterial.depthWrite = false;
+        cloudMaterial.blending = THREE.AdditiveBlending;
+
+        const cloudPos = cloudPositionBuffer.toAttribute();
+        const cloudColor = cloudColorBuffer.toAttribute();
+        const cloudSize = cloudSizeBuffer.toAttribute();
+        const cloudRotation = cloudRotationBuffer.toAttribute();
+
+        cloudMaterial.positionNode = cloudPos;
+        cloudMaterial.colorNode = vec4(cloudColor.x, cloudColor.y, cloudColor.z, float(1.0));
+        cloudMaterial.scaleNode = cloudSize.mul(this.uniforms.visual.cloudSize);
+        cloudMaterial.rotationNode = cloudRotation;
+
+        if (this.cloudTexture) {
+          const cloudTextureNode = texture(this.cloudTexture, uv());
+          cloudMaterial.opacityNode = cloudTextureNode.a.mul(this.uniforms.visual.cloudOpacity);
+        } else {
+          cloudMaterial.opacityNode = this.uniforms.visual.cloudOpacity;
+        }
+
+        this.cloudPlane = new THREE.Sprite(cloudMaterial);
+        this.cloudPlane.count = CLOUD_COUNT;
+        this.cloudPlane.frustumCulled = false;
+        this.cloudPlane.renderOrder = -1;
+        this.scene.add(this.cloudPlane);
+        this.cloudInitialized = false;
+      }
+
+      async update(renderer, deltaTime, mouse3D, mousePressed) {
+        if (!this.initialized) {
+          await renderer.computeAsync(this.computeInit);
+          this.initialized = true;
+        }
+        if (!this.cloudInitialized && this.cloudInit) {
+          await renderer.computeAsync(this.cloudInit);
+          this.cloudInitialized = true;
+        }
+        this.uniforms.compute.time.value += deltaTime;
+        this.uniforms.compute.deltaTime.value = deltaTime;
+        this.uniforms.compute.mouse.value.copy(mouse3D);
+        this.uniforms.compute.mouseActive.value = mousePressed ? 1.0 : 0.0;
+        await renderer.computeAsync(this.computeUpdate);
+        if (this.cloudUpdate) await renderer.computeAsync(this.cloudUpdate);
+      }
+    }
+
+    const config = {
+      starCount: 250000,
+      rotationSpeed: 0.05,
+      spiralTightness: 1.2,
+      mouseForce: 7.0,
+      mouseRadius: 10.0,
+      galaxyRadius: 13.0,
+      galaxyThickness: 3,
+      armCount: 2,
+      armWidth: 4,
+      randomness: 2.5,
+      particleSize: 0.1,
+      starBrightness: 0.5,
+      denseStarColor: '#2885ff',
+      sparseStarColor: '#ffa27a',
+      bloomStrength: 0.1,
+      bloomRadius: 0.1,
+      bloomThreshold: 0.4,
+      cloudCount: 2000,
+      cloudSize: 3,
+      cloudOpacity: 0.03,
+      cloudTintColor: '#ffe0de'
+    };
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0d1520);
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 15, 20);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGPURenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 5;
+    controls.maxDistance = 30;
+    controls.target.set(0, -4, 0);
+
+    let postProcessing = null;
+
+    const mouse3D = new THREE.Vector3(0, 0, 0);
+    const raycaster = new THREE.Raycaster();
+    const intersectionPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    let mousePressed = false;
+
+    window.addEventListener('mousedown', () => mousePressed = true);
+    window.addEventListener('mouseup', () => mousePressed = false);
+    window.addEventListener('mousemove', (event) => {
+      const mouse = new THREE.Vector2(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        -(event.clientY / window.innerHeight) * 2 + 1
+      );
+      raycaster.setFromCamera(mouse, camera);
+      raycaster.ray.intersectPlane(intersectionPlane, mouse3D);
+    });
+
+    function createStarryBackground(scene, count = 5000) {
+      const starGeometry = new THREE.BufferGeometry();
+      const starPositions = new Float32Array(count * 3);
+      const starColors = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+        const radius = 100 + Math.random() * 100;
+        starPositions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+        starPositions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+        starPositions[i * 3 + 2] = radius * Math.cos(phi);
+        const color = 0.8 + Math.random() * 0.2;
+        const tint = Math.random();
+        if (tint < 0.1) {
+          starColors[i * 3] = color * 0.8; starColors[i * 3 + 1] = color * 0.9; starColors[i * 3 + 2] = color;
+        } else if (tint < 0.2) {
+          starColors[i * 3] = color; starColors[i * 3 + 1] = color * 0.8; starColors[i * 3 + 2] = color * 0.6;
+        } else {
+          starColors[i * 3] = color; starColors[i * 3 + 1] = color; starColors[i * 3 + 2] = color;
+        }
+      }
+      starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      starGeometry.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+      const starMaterial = new THREE.PointsMaterial({ size: 0.3, vertexColors: true, transparent: true, opacity: 0.8, sizeAttenuation: true });
+      const stars = new THREE.Points(starGeometry, starMaterial);
+      scene.add(stars);
+      return stars;
+    }
+
+    function createCloudTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128; canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
+      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 128, 128);
+      return new THREE.CanvasTexture(canvas);
+    }
+
+    const cloudTexture = createCloudTexture();
+    const galaxySimulation = new GalaxySimulation(scene, config, cloudTexture);
+    galaxySimulation.createGalaxySystem();
+    galaxySimulation.createClouds();
+    createStarryBackground(scene);
+
+    function setupBloom() {
+      if (!postProcessing) return;
+      const scenePass = pass(scene, camera);
+      const scenePassColor = scenePass.getTextureNode();
+      const bloomPassNode = bloom(scenePassColor);
+      bloomPassNode.threshold.value = config.bloomThreshold;
+      bloomPassNode.strength.value = config.bloomStrength;
+      bloomPassNode.radius.value = config.bloomRadius;
+      postProcessing.outputNode = scenePassColor.add(bloomPassNode);
+    }
+
+    let lastFrameTime = performance.now();
+
+    async function animate() {
+      requestAnimationFrame(animate);
+      const currentTime = performance.now();
+      const deltaTime = Math.min((currentTime - lastFrameTime) / 1000, 0.033);
+      lastFrameTime = currentTime;
+      controls.update();
+      await galaxySimulation.update(renderer, deltaTime, mouse3D, mousePressed);
+      if (postProcessing) {
+        postProcessing.render();
+      } else {
+        renderer.render(scene, camera);
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    renderer.init().then(() => {
+      postProcessing = new THREE.PostProcessing(renderer);
+      setupBloom();
+      animate();
+    }).catch(err => {
+      console.error('Failed to initialize renderer:', err);
+      document.getElementById('webgpu-fallback').style.display = 'flex';
+    });
+  </script>
+</body>
+</html>

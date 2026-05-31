@@ -1,12 +1,14 @@
 "use client"
 
 import { useRef, useState, useEffect } from "react"
-import { motion, useInView, AnimatePresence } from "framer-motion"
+import { motion, useInView } from "framer-motion"
 import Floating, { FloatingElement } from "@/components/ui/floating"
 import { AuroraBackground } from "@/components/ui/aurora-background"
 import { TextRevealByWord } from "@/components/ui/text-reveal"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion-1"
-import Image from "next/image"
+import { Testimonials } from "@/components/ui/unique-testimonial"
+import { SiteHeader } from "@/components/site-header"
+import { SiteFooter } from "@/components/site-footer"
 import Link from "next/link"
 
 // ─── Animation helpers ───────────────────────────────────────────────────────
@@ -34,106 +36,6 @@ function FadeUp({
   )
 }
 
-// ─── Navbar ──────────────────────────────────────────────────────────────────
-function Navbar() {
-  const [scrolled, setScrolled] = useState(false)
-  const [open, setOpen] = useState(false)
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener("scroll", onScroll)
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [])
-
-  const links = [
-    { href: "#hero", label: "Início" },
-    { href: "#sobre", label: "Sobre" },
-    { href: "#servicos", label: "Serviços" },
-    { href: "#cases", label: "Cases" },
-    { href: "#faq", label: "FAQ" },
-    { href: "#contato", label: "Contato" },
-  ]
-
-  return (
-    <header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-[#f4f2eb]/90 backdrop-blur-md shadow-sm" : "bg-transparent"
-      }`}
-    >
-      <nav className="flex justify-between items-center px-6 py-3 w-full max-w-7xl mx-auto">
-        <Link href="#hero" className="flex items-center">
-          <Image
-            src="/logo.png"
-            alt="ClickConverte"
-            width={320}
-            height={80}
-            className="h-16 w-auto object-contain"
-            priority
-          />
-        </Link>
-
-        {/* Desktop links */}
-        <div className="hidden md:flex gap-10 items-center">
-          {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="font-headline text-sm text-primary/70 hover:text-accent transition-colors duration-200"
-            >
-              {l.label}
-            </a>
-          ))}
-        </div>
-
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden flex flex-col gap-[5px] p-2"
-          onClick={() => setOpen(!open)}
-          aria-label="Menu"
-        >
-          <motion.span
-            animate={open ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }}
-            className="block w-6 h-[1.5px] bg-primary"
-          />
-          <motion.span
-            animate={open ? { opacity: 0 } : { opacity: 1 }}
-            className="block w-6 h-[1.5px] bg-primary"
-          />
-          <motion.span
-            animate={open ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }}
-            className="block w-6 h-[1.5px] bg-primary"
-          />
-        </button>
-      </nav>
-
-      {/* Mobile menu */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-[#f4f2eb]/95 backdrop-blur-md border-t border-primary/5"
-          >
-            <div className="flex flex-col px-6 py-6 gap-5">
-              {links.map((l) => (
-                <a
-                  key={l.href}
-                  href={l.href}
-                  onClick={() => setOpen(false)}
-                  className="font-headline text-primary/80 hover:text-accent transition-colors"
-                >
-                  {l.label}
-                </a>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </header>
-  )
-}
-
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 const floatingWords = [
   { text: "Branding", className: "top-[12%] left-[5%] text-3xl", depth: 2 },
@@ -148,7 +50,6 @@ function Hero() {
   return (
     <section id="hero" className="relative min-h-screen overflow-hidden">
       <AuroraBackground className="min-h-screen" showRadialGradient>
-        {/* Floating parallax words */}
         <Floating sensitivity={0.8} easingFactor={0.04}>
           {floatingWords.map((w) => (
             <FloatingElement key={w.text} className={w.className} depth={w.depth}>
@@ -162,7 +63,6 @@ function Hero() {
           ))}
         </Floating>
 
-        {/* Content */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-32 pb-24">
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
@@ -208,7 +108,6 @@ function Hero() {
             </a>
           </motion.div>
 
-          {/* Scroll indicator */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -227,30 +126,50 @@ function Hero() {
   )
 }
 
-// ─── Sobre ────────────────────────────────────────────────────────────────────
-function Sobre() {
+// ─── Galaxy ───────────────────────────────────────────────────────────────────
+function Galaxy() {
   return (
-    <section id="sobre" className="bg-surface">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 pt-16 pb-0">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-32 mb-0">
-          <FadeUp delay={0}>
-            <span className="text-xs uppercase tracking-[0.2em] text-accent font-headline font-bold mb-6 block">
-              About
-            </span>
-            <h2 className="text-4xl md:text-5xl font-display italic text-primary">
-              Sobre a ClickConverte
-            </h2>
-          </FadeUp>
-          <FadeUp delay={0.15} className="self-start pt-12 hidden md:block">
-            <p className="text-xs uppercase tracking-[0.2em] text-primary/30 font-headline">
-              Role para descobrir
-            </p>
-          </FadeUp>
-        </div>
+    <section className="relative overflow-hidden" style={{ height: "100svh", minHeight: "600px" }}>
+      {/* Galaxy iframe */}
+      <iframe
+        src="/galaxy.html"
+        className="absolute inset-0 w-full h-full border-0"
+        title="Galaxy Animation"
+        style={{ background: "#0d1520" }}
+      />
+
+      {/* Top gradient fade from hero */}
+      <div
+        className="absolute inset-x-0 top-0 h-32 pointer-events-none z-10"
+        style={{ background: "linear-gradient(to bottom, #f4f2eb, transparent)" }}
+      />
+
+      {/* Text overlay */}
+      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-6 pb-16 gap-10">
+        <FadeUp className="max-w-4xl">
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-display text-white font-medium leading-[1.1]">
+            Você tem uma galáxia de possibilidades para ter mais{" "}
+            <em className="italic text-accent" style={{ fontStyle: "italic" }}>
+              lucro e marca
+            </em>{" "}
+            com marketing — mas precisa da estratégia de um profissional para isso não virar apenas custo.
+          </h2>
+        </FadeUp>
+
+        <FadeUp delay={0.2}>
+          <Link
+            href="/sobre"
+            className="inline-block bg-accent text-[#0d1520] px-10 py-5 font-headline font-semibold text-sm tracking-wide rounded-none hover:-translate-y-0.5 transition-all duration-200 hover:bg-accent/90"
+          >
+            Saiba o que fazemos para transformar cliques em conversões
+          </Link>
+        </FadeUp>
       </div>
 
-      <TextRevealByWord
-        text="A ClickConverte nasceu da crença de que marketing bom não precisa ser barulhento para ser eficaz. Operando 100% online a partir de Belo Horizonte, ajudamos marcas a construírem autoridade real através de uma abordagem estratégica e design minimalista. No nosso atelier digital, cada detalhe é pensado para eliminar o ruído e focar no que realmente importa: a conexão genuína entre o seu serviço e quem precisa dele."
+      {/* Bottom gradient fade to next section */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-32 pointer-events-none z-10"
+        style={{ background: "linear-gradient(to top, #faf9f4, transparent)" }}
       />
     </section>
   )
@@ -427,7 +346,6 @@ function ConversionFlowAnimation() {
     const pulseRing       = svg.querySelector("#cf-pulse-ring")   as SVGCircleElement
     const cam             = svg.querySelector("#cf-cam")          as SVGGElement
 
-    // Build trunk segments
     type Seg = { bg: SVGPathElement; fg: SVGPathElement; len: number }
     const segments: Seg[] = []
 
@@ -457,7 +375,6 @@ function ConversionFlowAnimation() {
       segments.push({ bg, fg, len })
     }
 
-    // Shadows
     NODES.forEach((n) => {
       const scale = depthScale(n.z)
       const el = document.createElementNS(ns, "ellipse")
@@ -470,7 +387,6 @@ function ConversionFlowAnimation() {
       shadowsGroup.appendChild(el)
     })
 
-    // Nodes — rendered sorted by z (far first = behind)
     const nodeEls: SVGGElement[] = new Array(NODES.length)
     const nodeHalos: NodeListOf<Element>[] = new Array(NODES.length)
 
@@ -496,7 +412,6 @@ function ConversionFlowAnimation() {
       nodeHalos[i] = g.querySelectorAll(".cf-node-halo")
     })
 
-    // Animation state
     const state = {
       progress: 0,
       speed: 1 / 1500,
@@ -738,6 +653,27 @@ function Cases() {
   )
 }
 
+// ─── Testimonials section ─────────────────────────────────────────────────────
+function TestimonialsSection() {
+  return (
+    <section className="py-14 md:py-20 px-6 md:px-12 bg-[#faf9f4]">
+      <div className="max-w-7xl mx-auto">
+        <FadeUp>
+          <span className="text-xs uppercase tracking-[0.2em] text-accent font-headline font-bold mb-4 block text-center">
+            Depoimentos
+          </span>
+          <h2 className="text-4xl md:text-5xl font-display italic text-primary font-medium text-center mb-2">
+            O que dizem nossos clientes
+          </h2>
+        </FadeUp>
+        <FadeUp delay={0.15}>
+          <Testimonials />
+        </FadeUp>
+      </div>
+    </section>
+  )
+}
+
 // ─── FAQ ──────────────────────────────────────────────────────────────────────
 const faqItems = [
   {
@@ -830,7 +766,6 @@ function Contato() {
   return (
     <section id="contato" className="py-14 md:py-20 px-6 md:px-12 bg-primary">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-24 items-start">
-        {/* Left */}
         <FadeUp>
           <h2 className="text-5xl md:text-7xl font-display text-white mb-8 font-medium leading-tight">
             Vamos conversar?
@@ -844,7 +779,6 @@ function Contato() {
           </div>
         </FadeUp>
 
-        {/* Right — form */}
         <FadeUp delay={0.2}>
           <form onSubmit={handleSubmit} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -930,75 +864,21 @@ function Contato() {
   )
 }
 
-// ─── Footer ───────────────────────────────────────────────────────────────────
-function Footer() {
-  return (
-    <footer className="w-full bg-[#1b1c18] py-14 px-6 md:px-12">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
-        <div className="text-center md:text-left">
-          <span className="text-xl font-display italic text-white font-bold block mb-2">
-            ClickConverte
-          </span>
-          <p className="text-xs text-white/30 uppercase tracking-widest mb-3">
-            Belo Horizonte · 100% online
-          </p>
-          <p className="text-xs text-white/20 font-body">
-            © 2024 ClickConverte. Todos os direitos reservados.
-          </p>
-          <p className="text-[10px] text-white/15 font-body mt-1 tracking-wide">
-            CEO: Renata Cardoso
-          </p>
-        </div>
-
-        <div className="flex gap-10">
-          <a
-            href="#servicos"
-            className="text-xs uppercase tracking-widest text-white/40 hover:text-accent transition-colors font-headline"
-          >
-            Serviços
-          </a>
-          <a
-            href="#sobre"
-            className="text-xs uppercase tracking-widest text-white/40 hover:text-accent transition-colors font-headline"
-          >
-            Sobre
-          </a>
-          <a
-            href="#contato"
-            className="text-xs uppercase tracking-widest text-white/40 hover:text-accent transition-colors font-headline"
-          >
-            Contato
-          </a>
-        </div>
-
-        <div className="flex flex-col gap-1 text-right">
-          <a
-            href="mailto:contato@clickconverte.com.br"
-            className="text-xs text-white/40 hover:text-accent transition-colors font-body"
-          >
-            contato@clickconverte.com.br
-          </a>
-          <span className="text-xs text-white/20 font-body">@clickconverte</span>
-        </div>
-      </div>
-    </footer>
-  )
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function Home() {
   return (
     <>
-      <Navbar />
+      <SiteHeader />
       <main>
         <Hero />
-        <Sobre />
+        <Galaxy />
         <Servicos />
         <Cases />
+        <TestimonialsSection />
         <FAQ />
         <Contato />
       </main>
-      <Footer />
+      <SiteFooter />
     </>
   )
 }
