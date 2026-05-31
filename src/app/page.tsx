@@ -627,11 +627,11 @@ function Cases() {
         <FadeUp delay={0.1}>
           <p className="text-lg md:text-xl text-[#f4f2eb]/70 font-body leading-relaxed max-w-4xl mb-12">
             Ao longo da nossa trajetória, construímos resultados expressivos para negócios de
-            diferentes segmentos — do varejo físico ao digital, de profissionais autônomos a
+            diferentes segmentos, do varejo físico ao digital, de profissionais autônomos a
             empresas em expansão. Trabalhamos com marcas que precisavam ir além da presença online e
             construir autoridade real. Crescemos comunidades do zero até centenas de milhares de
             pessoas. Estruturamos operações comerciais que transformaram a forma de captar clientes.
-            Transformamos seguidores em compradores. Cada projeto é tratado como único — porque
+            Transformamos seguidores em compradores. Cada projeto é tratado como único, porque
             acreditamos que resultado consistente só vem de estratégia personalizada, não de fórmulas
             prontas.
           </p>
@@ -689,12 +689,12 @@ const faqItems = [
   {
     question: "Qual a diferença entre vocês e uma agência comum?",
     answer:
-      "A maioria das agências entrega conteúdo. A gente entrega conversão. Surgimos para transformar cliques em clientes — por isso cada estratégia começa com posicionamento e termina com resultado mensurável. Não fazemos post pelo post. Fazemos post para vender.",
+      "A maioria das agências entrega conteúdo. A gente entrega conversão. Surgimos para transformar cliques em clientes. Por isso cada estratégia começa com posicionamento e termina com resultado mensurável. Não fazemos post pelo post. Fazemos post para vender.",
   },
   {
     question: "Como funciona para começar?",
     answer:
-      "Preencha o formulário aqui do site e agende sua sessão de consultoria gratuita. Em uma conversa rápida, a gente entende o seu negócio, onde você está e o que faz sentido para o seu momento. O diagnóstico vem primeiro — porque o que converte para um produto físico é diferente do que converte para um serviço ou infoproduto.",
+      "Preencha o formulário aqui do site e agende sua sessão de consultoria gratuita. Em uma conversa rápida, a gente entende o seu negócio, onde você está e o que faz sentido para o seu momento. O diagnóstico vem primeiro, porque o que converte para um produto físico é diferente do que converte para um serviço ou infoproduto.",
   },
 ]
 

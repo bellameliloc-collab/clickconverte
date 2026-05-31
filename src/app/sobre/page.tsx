@@ -42,7 +42,7 @@ const values = [
   },
   {
     title: "Design com propósito",
-    desc: "Minimalismo não é falta de criatividade — é respeito pelo tempo do seu cliente. Criamos identidades e materiais que comunicam com clareza, sem ruído, sem exagero.",
+    desc: "Minimalismo não é falta de criatividade, é respeito pelo tempo do seu cliente. Criamos identidades e materiais que comunicam com clareza, sem ruído, sem exagero.",
   },
   {
     title: "Parceria de longo prazo",
@@ -138,7 +138,7 @@ export default function SobrePage() {
                   <div className="space-y-8">
                     <div>
                       <span className="text-5xl font-display font-medium text-accent block mb-1">100%</span>
-                      <span className="text-sm font-headline text-primary/60">Online — atendemos todo o Brasil</span>
+                      <span className="text-sm font-headline text-primary/60">Online, atendemos todo o Brasil</span>
                     </div>
                     <div>
                       <span className="text-5xl font-display font-medium text-accent block mb-1">+3</span>
