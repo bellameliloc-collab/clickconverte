@@ -8,9 +8,9 @@ gsap.registerPlugin(ScrollTrigger)
 
 const slides = [
   {
-    src: "/images/scroll-01.png",
-    alt: "Estratégia ClickConverte",
-    label: "Estratégia",
+    src: "/images/scroll-04.png",
+    alt: "Método ClickConverte",
+    label: "Método",
   },
   {
     src: "/images/scroll-02.png",
