@@ -5,6 +5,7 @@ import { motion, useInView } from "framer-motion"
 import { TextRevealByWord } from "@/components/ui/text-reveal"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
+import { ParallaxScroll } from "@/components/parallax-scroll"
 import Link from "next/link"
 
 function FadeUp({
@@ -81,6 +82,9 @@ export default function SobrePage() {
         <TextRevealByWord
           text="A ClickConverte nasceu da crença de que marketing bom não precisa ser barulhento para ser eficaz. Operando 100% online a partir de Belo Horizonte, ajudamos marcas a construírem autoridade real através de uma abordagem estratégica e design minimalista. No nosso atelier digital, cada detalhe é pensado para eliminar o ruído e focar no que realmente importa: a conexão genuína entre o seu serviço e quem precisa dele."
         />
+
+        {/* Parallax scroll de imagens */}
+        <ParallaxScroll />
 
         {/* O que nos diferencia */}
         <section className="py-14 md:py-20 px-6 md:px-12 bg-[#faf9f4]">
