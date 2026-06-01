@@ -22,11 +22,6 @@ const slides = [
     alt: "Resultado Digital ClickConverte",
     label: "Resultado",
   },
-  {
-    src: "/images/scroll-04.png",
-    alt: "Método ClickConverte",
-    label: "Método",
-  },
 ]
 
 export function ParallaxScroll() {
