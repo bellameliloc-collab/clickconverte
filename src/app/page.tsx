@@ -138,7 +138,7 @@ function Galaxy() {
             <em className="italic text-accent" style={{ fontStyle: "italic" }}>
               lucro e marca
             </em>{" "}
-            com marketing, mas precisa da estratégia de um profissional para isso não virar apenas custo.
+            com marketing.
           </h2>
         </FadeUp>
       </div>
@@ -166,15 +166,22 @@ function Galaxy() {
         />
       </div>
 
-      {/* Button centered below */}
-      <FadeUp delay={0.15} className="flex justify-center mt-12">
-        <Link
-          href="/sobre"
-          className="inline-block bg-accent text-[#0d1520] px-10 py-5 font-headline font-semibold text-sm tracking-wide rounded-none hover:-translate-y-0.5 transition-all duration-200 hover:bg-accent/90"
-        >
-          Saiba o que fazemos para transformar cliques em conversões
-        </Link>
-      </FadeUp>
+      {/* Text + button below the galaxy */}
+      <div className="max-w-3xl mx-auto text-center mt-12 flex flex-col items-center gap-8">
+        <FadeUp>
+          <p className="text-2xl md:text-3xl font-display text-[#f4f2eb]/90 font-medium leading-relaxed">
+            Mas precisa da estratégia de um profissional para isso não virar apenas custo.
+          </p>
+        </FadeUp>
+        <FadeUp delay={0.15}>
+          <Link
+            href="/sobre"
+            className="inline-block bg-accent text-[#0d1520] px-10 py-5 font-headline font-semibold text-sm tracking-wide rounded-none hover:-translate-y-0.5 transition-all duration-200 hover:bg-accent/90"
+          >
+            Saiba o que fazemos para transformar cliques em conversões
+          </Link>
+        </FadeUp>
+      </div>
     </section>
   )
 }
